@@ -1,0 +1,72 @@
+<html lang="en" >
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+	<style>
+		.track {
+			margin: 5px;
+		}
+		.track-desc {
+			padding-left: 10px;
+			padding-top: 12px;
+		}
+		.track-desc p {
+			margin: 0; padding: 0;
+		}
+	</style>
+</head>
+<body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak>
+	
+	<form ng-submit="search(search.query)">
+		<md-input-container>
+			<label>Search a song</label>
+			<input ng-model="search.query">
+		</md-input-container>
+
+		<md-button class="md-raised md-primary" type="submit">Search</md-button>
+	</form>
+
+	<audio ng-if="trackUrl" controls autoplay ng-src="{{trackUrl}}"></audio>
+
+	<div ng-if="tracks && tracks.length != 0">
+		<div ng-repeat="track in tracks" class="track" layout="row" ng-click="playTrack(track.artists[0].name, track.name)">
+			<img ng-src="{{track.album.images[2].url}}"/>
+
+			<div layout="column" class="track-desc">
+				<strong>{{track.name}}</strong>
+				<p>{{track.artists[0].name}}</p>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Angular Material requires Angular.js Libraries -->
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+
+	<!-- Angular Material Library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+
+	<!-- Your application bootstrap  -->
+	<script type="text/javascript">
+		var app = angular.module('jukebox', ['ngMaterial']);
+
+		app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
+			$scope.search = function(query) {
+				$http.get('/music/search?q='+query).then(function(response) {
+					console.log(response.data.body.tracks.items);
+					$scope.tracks = response.data.body.tracks.items;
+				}, function(err) {
+					console.log(err);
+				});
+			};
+
+			$scope.playTrack = function(artist, track) {
+				$scope.trackUrl = '/music/music?artist='+artist+'&track='+track;
+			}
+		}]);
+	</script>
+	
+</body>
+</html>

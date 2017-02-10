@@ -1,0 +1,22 @@
+{
+  "name": "Jukebox",
+  "version": "0.0.1",
+  "description": "A music server that streams mp3 files based on YouTube videos and Spotify data",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.1",
+    "googleapis": "^16.1.0",
+    "spotify-web-api-node": "^2.3.6",
+    "ytdl-core": "^0.8.1"
+  },
+  "devDependencies": {
+    "morgan": "^1.8.0",
+    "nodemon": "^1.11.0"
+  }
+}
