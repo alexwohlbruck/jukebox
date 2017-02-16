@@ -42,13 +42,12 @@ router.get('/music', function(req, res) {
 	});
 });
 
-router.get('/user/:user/playlist/:playlistId', function(req, res) {
+router.get('/users/:user/playlists/:playlistId', function(req, res) {
 	spotify.getPlaylist(req.params.user, req.params.playlistId)
 	  .then(function(data) {
-	  	res.json(data.body);
-	    console.log('Some information about this playlist', data.body);
+	  	res.status(200).json(data.body);
 	  }, function(err) {
-	    console.log('Something went wrong!', err);
+	    res.status(400).json(err);
 	  });
 });
 

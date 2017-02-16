@@ -13,6 +13,7 @@
 		.track-desc p {
 			margin: 0; padding: 0;
 		}
+		
 	</style>
 </head>
 <body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak>
@@ -29,7 +30,7 @@
 	<audio ng-if="trackUrl" controls autoplay ng-src="{{trackUrl}}"></audio>
 
 	<div ng-if="tracks && tracks.length != 0">
-		<div ng-repeat="track in tracks" class="track" layout="row" ng-click="playTrack(track.artists[0].name, track.name)">
+		<div ng-repeat="track in tracks" class="track" layout="row" ng-click="playTrack($index)">
 			<img ng-src="{{track.album.images[2].url}}"/>
 
 			<div layout="column" class="track-desc">
@@ -53,6 +54,8 @@
 		var app = angular.module('jukebox', ['ngMaterial']);
 
 		app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
+			var currentSong = null;
+			
 			$scope.search = function(query) {
 				$http.get('/music/search?q='+query).then(function(response) {
 					console.log(response.data.body.tracks.items);
@@ -62,9 +65,19 @@
 				});
 			};
 
-			$scope.playTrack = function(artist, track) {
-				$scope.trackUrl = '/music/music?artist='+artist+'&track='+track;
-			}
+			$scope.playTrack = function(index) {
+				currentSong = index;
+				var track = $scope.tracks[index],
+					artist = track.artists[0].name,
+					trackName = track.name;
+				
+				$scope.trackUrl = '/music/music?artist='+artist+'&track='+trackName;
+			};
+			
+			$scope.audio.addEventListener('ended', function() {
+				currentSong++;
+				$scope.playTrack(currentSong);
+			});
 		}]);
 	</script>
 	
