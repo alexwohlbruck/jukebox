@@ -1,10 +1,10 @@
-var spotify = require.main.require('./app/services/spotify');
+var express = require('express');
+var router = express.Router();
 var keys = require.main.require('./config/keys');
+var spotify = require.main.require('./app/services/spotify');
 var google = require('googleapis');
 var youtube = google.youtube('v3');
 var ytdl = require('ytdl-core');
-var express = require('express');
-var router = express.Router();
 
 router.get('/search', function(req, res) {
 
@@ -17,7 +17,7 @@ router.get('/search', function(req, res) {
 
 });
 
-router.get('/music', function(req, res) {
+router.get('/mp3', function(req, res) {
 
 	youtube.search.list({
 		part: 'snippet',
@@ -35,20 +35,20 @@ router.get('/music', function(req, res) {
 		var video = ytdl(url, {
 			filter: 'audioonly'
 		});
-
-		res.set({'Content-Type': 'audio/mpeg'});
-
+		
+		res.writeHead(200, {
+			'Content-Type': 'audio/mpeg',
+			'Accept-Ranges': 'bytes',
+			'Transfer-Encoding': 'chunked',
+			'Content-Disposition': 'inline; filename="' + req.query.track + ' - ' + req.query.artist + '.mp3"'
+		});
+		
+		video.on('end', function(data) {
+			console.log(data);
+		});
+		
 		video.pipe(res);
 	});
-});
-
-router.get('/users/:user/playlists/:playlistId', function(req, res) {
-	spotify.getPlaylist(req.params.user, req.params.playlistId)
-	  .then(function(data) {
-	  	res.status(200).json(data.body);
-	  }, function(err) {
-	    res.status(400).json(err);
-	  });
 });
 
 module.exports = router;
