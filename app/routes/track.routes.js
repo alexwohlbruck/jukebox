@@ -36,15 +36,20 @@ router.get('/mp3', function(req, res) {
 			filter: 'audioonly'
 		});
 		
-		res.writeHead(200, {
-			'Content-Type': 'audio/mpeg',
-			'Accept-Ranges': 'bytes',
-			'Transfer-Encoding': 'chunked',
-			'Content-Disposition': 'inline; filename="' + req.query.track + ' - ' + req.query.artist + '.mp3"'
+		video.on('info', function(data) {
+			// console.log(data);
 		});
 		
-		video.on('end', function(data) {
-			console.log(data);
+		video.on('response', function(data) {
+			var byteSize = data.headers['content-length'];
+			
+			res.writeHead(200, {
+				'Content-Type': 'audio/mpeg',
+	            'Content-Range': 'bytes ' + 0 + '-' + byteSize + '/' + byteSize,
+	            'Content-Length': byteSize,
+				'Content-Disposition': 'inline; filename="' + req.query.track + ' - ' + req.query.artist + '.mp3"',
+				'Accept-Ranges': 'bytes'
+			});
 		});
 		
 		video.pipe(res);
