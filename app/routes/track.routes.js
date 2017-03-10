@@ -29,30 +29,41 @@ router.get('/mp3', function(req, res) {
 		if (err) return res.status(err.statusCode).json(err);
 
 		var videoId = data.items[0].id.videoId;
-		
 		var url = 'https://www.youtube.com/watch?v='+videoId;
+		
+		var range = '0-';
+		
+		if (req.headers.range) {
+			range = req.headers.range.replace(/bytes=/, "");
+		}
 
-		var video = ytdl(url, {
-			filter: 'audioonly'
+		var audio = ytdl(url, {
+			filter: 'audioonly',
+			range: range
 		});
 		
-		video.on('info', function(data) {
-			// console.log(data);
-		});
-		
-		video.on('response', function(data) {
-			var byteSize = data.headers['content-length'];
+		audio.on('response', function(data) {
+			var totalSize = data.headers['content-length'];
 			
-			res.writeHead(200, {
+	        var parts = range.split("-");
+	        var partialstart = parts[0];
+	        var partialend = parts[1];
+	
+	        var start = parseInt(partialstart, 10);
+	        var end = partialend ? parseInt(partialend, 10) : totalSize - 1;
+			
+		    var chunkSize = (end - start) + 1;
+			
+			res.writeHead(206, {
 				'Content-Type': 'audio/mpeg',
-	            'Content-Range': 'bytes ' + 0 + '-' + byteSize + '/' + byteSize,
-	            'Content-Length': byteSize,
+	            'Content-Range': 'bytes ' + start + '-' + end + '/' + totalSize,
+	            'Content-Length': chunkSize,
 				'Content-Disposition': 'inline; filename="' + req.query.track + ' - ' + req.query.artist + '.mp3"',
 				'Accept-Ranges': 'bytes'
 			});
 		});
 		
-		video.pipe(res);
+		audio.pipe(res);
 	});
 });
 
