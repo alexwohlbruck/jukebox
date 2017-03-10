@@ -2,6 +2,7 @@
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
 	<style>
 		.track {
 			margin: 5px;
@@ -14,23 +15,63 @@
 			margin: 0; padding: 0;
 		}
 		
+		.playerBar {
+			position: fixed;
+			bottom: 0;
+			width: 100%;
+		}
+		.playerBar > md-card {
+			margin-bottom: 0;
+		}
+		
+		.autocomplete-custom-template .track, .autocomplete-custom-template .artist {
+			padding: 0;
+			margin: 0;
+		}
+		
 	</style>
 </head>
 <body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak>
 	
-	<form ng-submit="search(search.query)">
-		<md-input-container>
-			<label>Search a song</label>
-			<input ng-model="search.query">
-		</md-input-container>
-
-		<md-button class="md-raised md-primary" type="submit">Search</md-button>
-	</form>
-
-	<audio id="song" ng-show="trackUrl" controls autoplay ng-src="{{trackUrl}}" style="width: 50% !important;"></audio>
+	 <md-toolbar class="md-hue-2" md-whiteframe="3dp">
+		<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
+			<h2 flex="10" md-truncate>Jukebox</h2>
+			
+			<md-autocomplete
+				flex="40"
+				ng-disabled="isDisabled"
+				md-items="track in loadSuggestions(searchText)"
+				md-item-text="track.name"
+				md-no-cache="noCache"
+				md-selected-item="selectedItem"
+				md-search-text-change="loadSuggestions(searchText)"
+				md-search-text="searchText"
+				md-selected-item-change="playTrack(track)"
+				md-min-length="0"
+				md-delay="100"
+				md-menu-class="autocomplete-custom-template"
+				placeholder="Search a song, artist, or album">
+				
+				<md-item-template ng-click="playTrack(track)">
+					<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
+					<br/>
+					<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
+				</md-item-template>
+				
+				<md-not-found>
+					Sorry, we couldn't find <strong>{{searchText}}</strong>
+				</md-not-found>
+			</md-autocomplete>
+			
+			<span flex="10"></span>
+		</div>
+    </md-toolbar>
 	
-	{{trackUrl}}
-
+	<div class="md-padding" ng-show="trackUrl">
+		<p class="md-body-2">Track URL:</p>
+		<p class="md-body-1">{{$location.protocol() + '://' + $location.host() + trackUrl}}</p>
+	</div>
+	
 	<div ng-if="tracks && tracks.length != 0">
 		<div ng-repeat="track in tracks" class="track" layout="row" ng-click="playTrack($index)">
 			<img ng-src="{{track.album.images[2].url}}"/>
@@ -40,6 +81,18 @@
 				<p>{{track.artists[0].name}}</p>
 			</div>
 		</div>
+	</div>
+	
+	<div class="playerBar" layout="row" layout-align="center end">
+		<md-card flex="70">
+			<audio
+				id="song"
+				controls
+				autoplay
+				ng-src="{{trackUrl}}"
+				style="width: 100% !important;">
+			</audio>
+		</md-card>
 	</div>
 	
 	<!-- Angular Material requires Angular.js Libraries -->
@@ -57,7 +110,8 @@
 	<script type="text/javascript">
 		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio']);
 
-		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', function($scope, $http, ngAudio) {
+		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', function($scope, $http, ngAudio, $location) {
+			$scope.$location = $location;
 			var currentSong = null;
 			
 			document.getElementById('song').onended = function() {
@@ -65,25 +119,25 @@
 			    $scope.playTrack(currentSong);
 			};
 			
-			$scope.search = function(query) {
-				$http.get('/api/tracks/search?q='+query).then(function(response) {
-					console.log(response.data.body.tracks.items);
-					$scope.tracks = response.data.body.tracks.items;
-				}, function(err) {
-					console.log(err);
-				});
+			$scope.searchTracks = function(query) {
+				return $http.get('/api/tracks/search?q='+query);
+			};
+			
+			$scope.loadSuggestions = function(track) {
+				console.log(track);
+				return $scope.searchTracks(track)
+					.then(function(response) {
+						console.log(response.data.body.tracks.items);
+						return response.data.body.tracks.items;
+					});
 			};
 
-			$scope.playTrack = function(index) {
-				console.log('asdf');
-				currentSong = index;
-				var track = $scope.tracks[index],
-					artist = track.artists[0].name,
+			$scope.playTrack = function(track) {
+				var artistName = track.artists[0].name,
 					trackName = track.name;
 				
-				$scope.trackUrl = '/api/tracks/mp3?artist='+artist+'&track='+trackName;
+				$scope.trackUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
 				$scope.$apply();
-				console.log(artist, trackName, $scope.trackUrl);
 			};
 		}]);
 	</script>
