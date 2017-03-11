@@ -16,8 +16,6 @@
 		}
 		
 		.playerBar {
-			position: fixed;
-			bottom: 0;
 			width: 100%;
 		}
 		.playerBar > md-card {
@@ -29,67 +27,125 @@
 			margin: 0;
 		}
 		
+		.margin-0 {
+			margin: 0 !important;
+		}
+		
+		.padding-sides {
+			padding: 0px 16px;
+		}
+		
+		.md-avatar.no-mask {
+			border-radius: 0 !important;
+		}
+		
+		.md-avatar {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+		}
+		.md-avatar.large {
+			width: 60px;
+			height: 60px;
+		}
+		
+		.scroll-container {
+			overflow-y: scroll;
+		}
+		
 	</style>
 </head>
-<body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak>
+<body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak layout="column" layout-align="space-between stretch" style="height: 100vh;">
 	
 	 <md-toolbar class="md-hue-2" md-whiteframe="3dp">
-		<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
-			<h2 flex="10" md-truncate>Jukebox</h2>
-			
-			<md-autocomplete
-				flex="40"
-				ng-disabled="isDisabled"
-				md-items="track in loadSuggestions(searchText)"
-				md-item-text="track.name"
-				md-no-cache="noCache"
-				md-selected-item="selectedItem"
-				md-search-text-change="loadSuggestions(searchText)"
-				md-search-text="searchText"
-				md-selected-item-change="playTrack(track)"
-				md-min-length="0"
-				md-delay="100"
-				md-menu-class="autocomplete-custom-template"
-				placeholder="Search a song, artist, or album">
+		<form ng-submit="search(searchText)" class="margin-0">
+			<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
+				<h2 flex="10" md-truncate>Jukebox</h2>
 				
-				<md-item-template ng-click="playTrack(track)">
-					<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
-					<br/>
-					<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
-				</md-item-template>
+				<md-autocomplete
+					flex="40"
+					ng-disabled="isDisabled"
+					md-items="track in loadSuggestions(searchText)"
+					md-item-text="track.name"
+					md-no-cache="noCache"
+					md-selected-item="selectedItem"
+					md-search-text-change="loadSuggestions(searchText)"
+					md-search-text="searchText"
+					md-selected-item-change="playTrack(track)"
+					md-min-length="0"
+					md-delay="100"
+					md-menu-class="search-suggestion"
+					placeholder="Search a song, artist, or album">
+					
+					<md-item-template ng-click="playTrack(track)">
+						<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
+						<br/>
+						<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
+					</md-item-template>
+					
+					<md-not-found>
+						Sorry, we couldn't find <strong>{{searchText}}</strong>
+					</md-not-found>
+				</md-autocomplete>
 				
-				<md-not-found>
-					Sorry, we couldn't find <strong>{{searchText}}</strong>
-				</md-not-found>
-			</md-autocomplete>
-			
-			<span flex="10"></span>
-		</div>
+				<span flex="10"></span>
+			</div>
+		</form>
     </md-toolbar>
 	
-	<div class="md-padding" ng-show="trackUrl">
-		<p class="md-body-2">Track URL:</p>
-		<p class="md-body-1">{{$location.protocol() + '://' + $location.host() + trackUrl}}</p>
-	</div>
-	
-	<div ng-if="tracks && tracks.length != 0">
-		<div ng-repeat="track in tracks" class="track" layout="row" ng-click="playTrack($index)">
-			<img ng-src="{{track.album.images[2].url}}"/>
-
-			<div layout="column" class="track-desc">
-				<strong>{{track.name}}</strong>
-				<p>{{track.artists[0].name}}</p>
+	<div layout="row" flex ng-if="searchResults">
+		<div layout="row" layout-align="space-around stretch" flex>
+			<div flex ng-repeat="section in ['albums', 'playlists']"  class="scroll-container">
+				<md-list flex>
+					<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
+					
+					<md-list-item class="md-2-line" ng-repeat="item in searchResults[section]" ng-click="createNewQueue(section, $index, item)">
+						<img ng-src="{{item.images[0].url}}" class="md-avatar no-mask" alt="{{todos[0].who}}"/>
+						
+						<div class="md-list-item-text">
+							<h3>{{item.name}}</h3>
+							<p>{{item.artists[0].name || item.owner.id}}</p>
+						</div>
+					</md-list-item>
+				</md-list>
 			</div>
+		</div>
+		
+		<div flex="30" ng-show="queue.source" class="padding-sides scroll-container" md-whiteframe="4dp" style="z-index: 1;">
+			<p class="md-body-2">Now Playing</p>
+			
+			<div layout="row">
+				<img ng-src="{{queue.source.images[0].url}}" class="md-avatar large no-mask"/>
+				
+				<div layout="column" style="margin: 5px 15px;">
+					<p class="md-title margin-0">{{queue.source.name}}</p>
+					<p class="md-subhead margin-0">{{queue.source.artists[0].name || queue.source.owner.id}}</p>
+				</div>
+			</div>
+			
+			<md-list>
+				<md-list-item class="md-2-line" ng-repeat="track in queue.tracks" ng-click="playTrackFromQueue(track, $index)">
+					<img
+						ng-src="{{queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || queue.source.images[0].url)}}"
+						class="md-avatar no-mask"
+						alt="{{track.name}}"/>
+					
+					<div class="md-list-item-text">
+						<h3>{{track.name}}</h3>
+						<p>{{track.artists[0].name}}</p>
+					</div>
+				</md-list-item>
+			</md-list>			
 		</div>
 	</div>
 	
-	<div class="playerBar" layout="row" layout-align="center end">
+	<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="queue.nowPlaying.streamUrl">
 		<md-card flex="70">
 			<audio
 				id="song"
 				controls
 				autoplay
-				ng-src="{{trackUrl}}"
+				ng-src="{{queue.nowPlaying.streamUrl}}"
 				style="width: 100% !important;">
 			</audio>
 		</md-card>
@@ -108,38 +164,85 @@
 
 	<!-- Your application bootstrap  -->
 	<script type="text/javascript">
+		/* global angular */
 		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio']);
 
 		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', function($scope, $http, ngAudio, $location) {
 			$scope.$location = $location;
-			var currentSong = null;
-			
-			document.getElementById('song').onended = function() {
-			    currentSong++;
-			    $scope.playTrack(currentSong);
+			$scope.queue = {
+				nowPlaying: {
+					index: 0
+				}
 			};
 			
-			$scope.searchTracks = function(query) {
-				return $http.get('/api/tracks/search?q='+query);
+			$scope.search = function(query, limit, offset) {
+				$http({
+					url: '/api/search',
+					method: 'GET',
+					params: {
+						q: query,
+						limit: limit,
+						offset: offset
+					}
+				}).then(function(response) {
+					$scope.searchResults = {
+						albums: response.data.albums.items,
+						artists: response.data.artists.items,
+						playlists: response.data.playlists.items
+					};
+				});
 			};
 			
-			$scope.loadSuggestions = function(track) {
-				console.log(track);
-				return $scope.searchTracks(track)
+			$scope.loadSuggestions = function(query) {
+				return $http.get('/api/tracks/search?q='+ query)
 					.then(function(response) {
-						console.log(response.data.body.tracks.items);
 						return response.data.body.tracks.items;
 					});
+			};
+			
+			$scope.createNewQueue = function(dataType, i, item) {
+				var promise;
+				
+				switch (dataType) {
+					case 'albums':
+						promise = $http.get('/api/albums/'+item.id+'/tracks');
+						break;
+					case 'playlists':
+						promise = $http.get('/api/users/'+item.owner.id+'/playlists/'+item.id+'/tracks');
+						break;
+				}
+				
+				promise.then(function(response) {
+					$scope.queue.source = $scope.searchResults[dataType][i];
+					$scope.queue.tracks = (dataType == 'playlists' ? response.data.items.map(o => o.track) : response.data.items);
+					$scope.queue.nowPlaying.index = 0;
+					$scope.playTrack($scope.queue.tracks[0]);
+				});
 			};
 
 			$scope.playTrack = function(track) {
 				var artistName = track.artists[0].name,
 					trackName = track.name;
 				
-				$scope.trackUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
-				$scope.$apply();
+				$scope.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
+			};
+			
+			$scope.playTrackFromQueue = function(track, index) {
+				$scope.queue.nowPlaying.index = index;
+				$scope.playTrack(track);
+			};
+			
+			document.getElementById('song').onended = function() {
+				$scope.queue.nowPlaying.index++;
+			    $scope.playTrack($scope.queue.tracks[$scope.queue.nowPlaying.index]);
 			};
 		}]);
+		
+		app.filter('capitalize', function() {
+			return function(token) {
+				return token.charAt(0).toUpperCase() + token.slice(1);
+			};
+		});
 	</script>
 	
 </body>
