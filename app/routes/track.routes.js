@@ -18,7 +18,7 @@ router.get('/search', function(req, res) {
 });
 
 router.get('/mp3', function(req, res) {
-
+	
 	youtube.search.list({
 		part: 'snippet',
 		q: req.query.artist + ' - ' + req.query.track,
@@ -27,7 +27,8 @@ router.get('/mp3', function(req, res) {
 		type: 'video'
 	}, function(err, data) {
 		if (err) return res.status(err.statusCode).json(err);
-
+		if (data.items.length == 0) return res.status(404).json({message: "Couldn't find track"});
+		
 		var videoId = data.items[0].id.videoId;
 		var url = 'https://www.youtube.com/watch?v='+videoId;
 		
@@ -36,7 +37,7 @@ router.get('/mp3', function(req, res) {
 		if (req.headers.range) {
 			range = req.headers.range.replace(/bytes=/, "");
 		}
-
+		
 		var audio = ytdl(url, {
 			filter: 'audioonly',
 			range: range
@@ -45,20 +46,20 @@ router.get('/mp3', function(req, res) {
 		audio.on('response', function(data) {
 			var totalSize = data.headers['content-length'];
 			
-	        var parts = range.split("-");
-	        var partialstart = parts[0];
-	        var partialend = parts[1];
-	
-	        var start = parseInt(partialstart, 10);
-	        var end = partialend ? parseInt(partialend, 10) : totalSize - 1;
+			var parts = range.split("-");
+			var partialstart = parts[0];
+			var partialend = parts[1];
 			
-		    var chunkSize = (end - start) + 1;
+			var start = parseInt(partialstart, 10);
+			var end = partialend ? parseInt(partialend, 10) : totalSize - 1;
+			
+			var chunkSize = (end - start) + 1;
 			
 			res.writeHead(206, {
 				'Content-Type': 'audio/mpeg',
-	            'Content-Range': 'bytes ' + start + '-' + end + '/' + totalSize,
-	            'Content-Length': chunkSize,
-				'Content-Disposition': 'inline; filename="' + req.query.track + ' - ' + req.query.artist + '.mp3"',
+				'Content-Range': 'bytes ' + start + '-' + end + '/' + totalSize,
+				'Content-Length': chunkSize,
+				'Content-Disposition': 'inline; filename="music.mp3"',
 				'Accept-Ranges': 'bytes'
 			});
 		});

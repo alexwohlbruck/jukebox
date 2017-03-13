@@ -124,7 +124,7 @@
 			</div>
 			
 			<md-list>
-				<md-list-item class="md-2-line" ng-repeat="track in queue.tracks" ng-click="playTrackFromQueue(track, $index)">
+				<md-list-item class="md-2-line" ng-repeat="track in queue.tracks" ng-click="playTrackFromIndex($index)">
 					<img
 						ng-src="{{queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || queue.source.images[0].url)}}"
 						class="md-avatar no-mask"
@@ -225,16 +225,17 @@
 					trackName = track.name;
 				
 				$scope.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
+				$scope.$apply();
 			};
 			
-			$scope.playTrackFromQueue = function(track, index) {
+			$scope.playTrackFromIndex = function(index) {
 				$scope.queue.nowPlaying.index = index;
-				$scope.playTrack(track);
+				$scope.playTrack($scope.queue.tracks[index]);
 			};
 			
 			document.getElementById('song').onended = function() {
 				$scope.queue.nowPlaying.index++;
-			    $scope.playTrack($scope.queue.tracks[$scope.queue.nowPlaying.index]);
+			    $scope.playTrackFromIndex($scope.queue.nowPlaying.index);
 			};
 		}]);
 		
