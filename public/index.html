@@ -3,6 +3,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<style>
 		.track {
 			margin: 5px;
@@ -134,13 +135,12 @@
 						<h3>{{track.name}}</h3>
 						<p>{{track.artists[0].name}}</p>
 					</div>
-				</md-list-item>
 			</md-list>			
 		</div>
 	</div>
 	
 	<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="queue.nowPlaying.streamUrl">
-		<md-card flex="70">
+		<md-card flex="70" layout="row">
 			<audio
 				id="song"
 				controls
@@ -148,6 +148,10 @@
 				ng-src="{{queue.nowPlaying.streamUrl}}"
 				style="width: 100% !important;">
 			</audio>
+			
+			<md-button class="md-icon-button" ng-click="openLyrics($event)">
+				<md-icon class="material-icons">music_note</md-icon>
+			</md-button>
 		</md-card>
 	</div>
 	
@@ -167,8 +171,9 @@
 		/* global angular */
 		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio']);
 
-		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', function($scope, $http, ngAudio, $location) {
+		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', '$mdMenu', '$mdDialog', function($scope, $http, ngAudio, $location, $mdMenu, $mdDialog) {
 			$scope.$location = $location;
+			$scope.$mdMenu = $mdMenu;
 			$scope.queue = {
 				nowPlaying: {
 					index: 0
@@ -231,6 +236,24 @@
 			$scope.playTrackFromIndex = function(index) {
 				$scope.queue.nowPlaying.index = index;
 				$scope.playTrack($scope.queue.tracks[index]);
+			};
+			
+			$scope.openLyrics = function(event) {
+				var track = $scope.queue.tracks[$scope.queue.nowPlaying.index];
+				$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
+					$mdDialog.show({
+						parent: angular.element(document.body),
+						targetEvent: event,
+						template: '<h3>Lyrics:</h3><p style="white-space: pre;">{{track.lyrics}}</p><p>Lyrics from <a href="{{track.url}}" target="_blank">MetroLyrics</a></p>',
+						locals: {
+							
+						},
+						controller: ['$scope', function($scope) {
+							$scope.track = response.data;
+						}],
+						clickOutsideToClose: true
+					});
+				});
 			};
 			
 			document.getElementById('song').onended = function() {

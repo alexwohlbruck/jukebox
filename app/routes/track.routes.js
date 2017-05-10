@@ -5,6 +5,8 @@ var spotify = require.main.require('./app/services/spotify');
 var google = require('googleapis');
 var youtube = google.youtube('v3');
 var ytdl = require('ytdl-core');
+var request = require('request-promise');
+var cheerio = require('cheerio');
 
 router.get('/search', function(req, res) {
 
@@ -66,6 +68,51 @@ router.get('/mp3', function(req, res) {
 		
 		audio.pipe(res);
 	});
+});
+
+// Get lyics for a song
+var metrolyrics = {
+	base: 'http://www.metrolyrics.com/',
+	formatString: function(string) {
+		return string
+			.split(" - feat.")[0].split(" - ft.")[0] // Remove artist feature tag
+			.replace(/ *\([^)]*\) */g, "") // Remove text in parenthesis
+			.replace(/[^a-zA-Z0-9 ]/g, "") // Remove non alpha charrs
+			.toLowerCase()
+			.split(' ')
+			.join('-');
+	},
+	getUrl: function(track) {
+		return this.base + this.formatString(track.name) + '-lyrics-' + this.formatString(track.artists[0].name) + '.html';
+	}
+};
+router.get('/lyrics', function(req, res) {
+	if (!req.query.track_id) return res.status(404).json({message: "No track id given"});
+	
+	var response = {};
+    
+    spotify.getTrack(req.query.track_id).then(function(data) {
+    	var url = response.url = metrolyrics.getUrl(data.body);
+    	
+    	return request(url);
+    })
+    .then(function(html) {
+	    var $ = cheerio.load(html);
+	    var container = $('#lyrics-body-text');
+	    
+	    var lyrics = response.lyrics = container.text();
+	    
+	    if (lyrics == '\n\t') console.log('no lyrics');
+	    
+	    return res.status(200).json(response);
+    })
+    .catch(function(err) {
+    	if (err.statusCode == 404) {
+    		// These results are a big mess (It's html for the 404 page)
+    		err.error = undefined; err.message = undefined; err.response.body = undefined;
+    	}
+    	return res.status(err.statusCode || 400).json(err);
+    });
 });
 
 module.exports = router;
