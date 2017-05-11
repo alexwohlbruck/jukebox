@@ -84,6 +84,9 @@ var metrolyrics = {
 	},
 	getUrl: function(track) {
 		return this.base + this.formatString(track.name) + '-lyrics-' + this.formatString(track.artists[0].name) + '.html';
+	},
+	messages: {
+		notFound: "No lyrics available"
 	}
 };
 router.get('/lyrics', function(req, res) {
@@ -98,18 +101,22 @@ router.get('/lyrics', function(req, res) {
     })
     .then(function(html) {
 	    var $ = cheerio.load(html);
-	    var container = $('#lyrics-body-text');
 	    
-	    var lyrics = response.lyrics = container.text();
+	    var lyrics = response.lyrics = $('#lyrics-body-text .verse').map(function(i, el) {
+			return $(this).text();
+		}).get().join('\n\n').trim();
 	    
-	    if (lyrics == '\n\t') console.log('no lyrics');
+	    if (lyrics == '')
+	    	return res.status(404).json({message: metrolyrics.messages.notFound});
 	    
 	    return res.status(200).json(response);
     })
     .catch(function(err) {
     	if (err.statusCode == 404) {
     		// These results are a big mess (It's html for the 404 page)
-    		err.error = undefined; err.message = undefined; err.response.body = undefined;
+    		err.error = undefined;
+    		err.message = metrolyrics.messages.notFound;
+    		err.response.body = undefined;
     	}
     	return res.status(err.statusCode || 400).json(err);
     });

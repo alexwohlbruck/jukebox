@@ -150,6 +150,7 @@
 			</audio>
 			
 			<md-button class="md-icon-button" ng-click="openLyrics($event)">
+				<md-tooltip md-direction="top">Show lyrics</md-tooltip>
 				<md-icon class="material-icons">music_note</md-icon>
 			</md-button>
 		</md-card>
@@ -244,7 +245,7 @@
 					$mdDialog.show({
 						parent: angular.element(document.body),
 						targetEvent: event,
-						template: '<h3>Lyrics:</h3><p style="white-space: pre;">{{track.lyrics}}</p><p>Lyrics from <a href="{{track.url}}" target="_blank">MetroLyrics</a></p>',
+						templateUrl: 'views/lyrics.html',
 						locals: {
 							
 						},
