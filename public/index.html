@@ -1,8 +1,5 @@
-<html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
+<html lang="en" >
 <head>
-	<title ng-bind="queue.nowPlaying.streamUrl ? (queue.tracks[queue.nowPlaying.index].name + ' - ' + queue.tracks[queue.nowPlaying.index].artists[0].name) : 'Jukebox Redux'">
-		Jukebox Redux
-	</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
@@ -59,8 +56,8 @@
 		
 	</style>
 </head>
-<body ng-cloak layout="column" layout-align="space-between stretch" style="height: 100vh;">
-	
+<body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak layout="column" layout-align="space-between stretch" style="height: 100vh;">
+
 	<md-toolbar class="md-hue-2" md-whiteframe="3dp">
 		<form ng-submit="search(searchText)" class="margin-0">
 			<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
@@ -73,7 +70,6 @@
 					md-item-text="track.name"
 					md-no-cache="noCache"
 					md-selected-item="selectedItem"
-					md-search-text-change="loadSuggestions(searchText)"
 					md-search-text="searchText"
 					md-selected-item-change="playTrack(track)"
 					md-min-length="0"

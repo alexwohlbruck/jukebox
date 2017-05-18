@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.16.1",
     "cheerio": "^0.22.0",
+    "combined-stream": "^1.0.5",
     "cookie-parser": "^1.4.3",
     "express": "^4.14.1",
     "googleapis": "^16.1.0",
@@ -19,7 +20,7 @@
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "spotify-web-api-node": "^2.3.6",
-    "ytdl-core": "^0.8.1"
+    "ytdl-core": "^0.14.1"
   },
   "devDependencies": {
     "morgan": "^1.8.0",

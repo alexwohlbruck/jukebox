@@ -21,6 +21,8 @@ router.get('/search', function(req, res) {
 
 router.get('/mp3', function(req, res) {
 	
+	if (!req.query.artist || !req.query.track) return res.json({message: "Provide an artist and a track name"});
+	
 	youtube.search.list({
 		part: 'snippet',
 		q: req.query.artist + ' - ' + req.query.track,
@@ -57,11 +59,11 @@ router.get('/mp3', function(req, res) {
 			
 			var chunkSize = (end - start) + 1;
 			
-			res.writeHead(206, {
-				'Content-Type': 'audio/mpeg',
+			res.writeHead(200, {
+				'Content-Type': 'audio/webm',
 				'Content-Range': 'bytes ' + start + '-' + end + '/' + totalSize,
 				'Content-Length': chunkSize,
-				'Content-Disposition': 'inline; filename="music.mp3"',
+				'Content-Disposition': 'inline; filename="'+req.query.track.replace(/[^a-zA-Z0-9 ]/g, "")+'.mp3"',
 				'Accept-Ranges': 'bytes'
 			});
 		});
@@ -75,9 +77,9 @@ var metrolyrics = {
 	base: 'http://www.metrolyrics.com/',
 	formatString: function(string) {
 		return string
-			.split(" - feat.")[0].split(" - ft.")[0] // Remove artist feature tag
+			.split(" - feat.")[0].split(" - ft.")[0] // Remove artist feature tag*/
 			.replace(/ *\([^)]*\) */g, "") // Remove text in parenthesis
-			.replace(/[^a-zA-Z0-9 ]/g, "") // Remove non alpha charrs
+			.replace(/[^a-zA-Z0-9 ]/g, "") // Remove non alpha chars
 			.toLowerCase()
 			.split(' ')
 			.join('-');
