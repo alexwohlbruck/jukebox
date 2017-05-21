@@ -1,5 +1,8 @@
 var express = require('express');
 var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+
 var env = process.env.NODE_ENV;
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -19,7 +22,9 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use('/api', require('./app/routes'));
 app.use('/', express.static('public'));
 
+require('./app/sockets')(io);
+
 var port = process.env.PORT || 8080;
-app.listen(port, function () {
+server.listen(port, function () {
   console.log('App listening on port '+port+'!');
-})
+});

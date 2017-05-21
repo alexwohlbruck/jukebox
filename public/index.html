@@ -96,8 +96,10 @@
 		</form>
     </md-toolbar>
 	
-	<div layout="row" flex ng-if="searchResults">
-		<div layout="row" layout-align="space-around stretch" flex>
+	<div layout="row" flex>
+		<span ng-show="!searchResults" flex></span>
+		
+		<div layout="row" layout-align="space-around stretch" flex ng-show="searchResults">
 			<div flex ng-repeat="section in ['albums', 'playlists']"  class="scroll-container">
 				<md-list flex>
 					<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
@@ -114,22 +116,22 @@
 			</div>
 		</div>
 		
-		<div flex="30" ng-show="queue.source" class="padding-sides scroll-container" md-whiteframe="4dp" style="z-index: 1;">
+		<div flex="30" ng-show="Player.queue.source" class="padding-sides scroll-container" md-whiteframe="4dp" style="z-index: 1;">
 			<p class="md-body-2">Now Playing</p>
 			
 			<div layout="row">
-				<img ng-src="{{queue.source.images[0].url}}" class="md-avatar large no-mask"/>
+				<img ng-src="{{Player.queue.source.images[0].url}}" class="md-avatar large no-mask"/>
 				
 				<div layout="column" style="margin: 5px 15px;">
-					<p class="md-title margin-0">{{queue.source.name}}</p>
-					<p class="md-subhead margin-0">{{queue.source.artists[0].name || queue.source.owner.id}}</p>
+					<p class="md-title margin-0">{{Player.queue.source.name}}</p>
+					<p class="md-subhead margin-0">{{Player.queue.source.artists[0].name || Player.queue.source.owner.id}}</p>
 				</div>
 			</div>
 			
 			<md-list>
-				<md-list-item class="md-2-line" ng-repeat="track in queue.tracks" ng-click="playTrackFromIndex($index)">
+				<md-list-item class="md-2-line" ng-repeat="track in Player.queue.tracks" ng-click="playTrackFromIndex($index)">
 					<img
-						ng-src="{{queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || queue.source.images[0].url)}}"
+						ng-src="{{Player.queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || Player.queue.source.images[0].url)}}"
 						class="md-avatar no-mask"
 						alt="{{track.name}}"/>
 					
@@ -141,13 +143,12 @@
 		</div>
 	</div>
 	
-	<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="queue.nowPlaying.streamUrl">
+	<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="Player.queue.nowPlaying.streamUrl">
 		<md-card flex="70" layout="row">
 			<audio
 				id="song"
 				controls
-				autoplay
-				ng-src="{{queue.nowPlaying.streamUrl}}"
+				ng-src="{{Player.queue.nowPlaying.streamUrl}}"
 				style="width: 100% !important;">
 			</audio>
 			
@@ -158,7 +159,7 @@
 	</div>
 	
 	<!-- Angular Material requires Angular.js Libraries -->
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
@@ -166,20 +167,157 @@
 	<!-- Angular Material Library -->
 	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
 	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> <!-- Socket.io -->
+	<script src="https://cdn.rawgit.com/btford/angular-socket-io/master/socket.js"></script> <!-- Angular Socket.io -->
 	<script src="https://cdn.rawgit.com/danielstern/ngAudio/master/app/angular.audio.js"></script>
 
 	<!-- Your application bootstrap  -->
 	<script type="text/javascript">
 		/* global angular */
-		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio']);
-
-		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', '$mdMenu', '$mdDialog', function($scope, $http, ngAudio, $location, $mdMenu, $mdDialog) {
-			$scope.$location = $location;
-			$scope.$mdMenu = $mdMenu;
-			$scope.queue = {
+		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio', 'btford.socket-io']);
+		
+		app.factory('Socket', ['socketFactory', function(socketFactory) {
+			return socketFactory();
+		}]);
+		
+		app.service('Player', ['$rootScope', 'Socket', '$http', function($rootScope, Socket, $http) {
+			var Player = this;
+			
+			this.el = document.getElementById('song');
+			
+			this.queue = {
 				nowPlaying: {
 					index: 0
 				}
+			};
+			
+			this.createNewQueue = function(dataType, i, item, source) {
+				var promise;
+				
+				switch (dataType) {
+					case 'albums':
+						promise = $http.get('/api/albums/'+item.id+'/tracks');
+						break;
+					case 'playlists':
+						promise = $http.get('/api/users/'+item.owner.id+'/playlists/'+item.id+'/tracks');
+						break;
+				}
+				
+				promise.then(function(response) {
+					Player.queue.source = source;
+					Player.queue.tracks = (dataType == 'playlists' ? response.data.items.map(o => o.track) : response.data.items);
+					Player.queue.nowPlaying.index = 0;
+					Player.playTrack(Player.queue.tracks[0]);
+				});
+			};
+			
+			this.playTrack = function(track) {
+				var artistName = track.artists[0].name,
+					trackName = track.name;
+				
+				Player.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
+			};
+			
+			this.playTrackFromIndex = function(index) {
+				Player.queue.nowPlaying.index = index;
+				Player.playTrack(Player.queue.tracks[index]);
+			};
+			
+			this.skipTrack = function() {
+				Player.queue.nowPlaying.index++;
+			    Player.playTrackFromIndex(Player.queue.nowPlaying.index);
+			};
+			
+			this.el.addEventListener('play', function() { Socket.emit('playback:play'); });
+			
+			this.el.addEventListener('pause', function() { Socket.emit('playback:pause'); });
+			
+			this.el.addEventListener('onended', function() { Socket.emit('track:ended'); });
+			
+			this.el.addEventListener('oncanplay', function() { Socket.emit('track:canplay'); });
+			
+			Socket.on('queue:create', function(data) {
+				console.log(data);
+				Player.createNewQueue(data.dataType, data.i, data.item, data.source);
+			});
+			
+			Socket.on('track:play', function(data) {
+				Player.playTrack(data.track);
+			});
+			
+			Socket.on('track:play.index', function(data) {
+				Player.playTrackFromIndex(data.index);
+			});
+			
+			Socket.on('playback:play', function() {
+				Player.el.play();
+			});
+			
+			Socket.on('playback:pause', function() {
+				Player.el.pause();
+			});
+			
+			Socket.on('playback:ended', function() {
+				Player.el.skipTrack();
+			});
+		}]);
+
+		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', '$mdMenu', '$mdDialog', 'Socket', 'Player',
+			function($scope, $http, ngAudio, $location, $mdMenu, $mdDialog, Socket, Player) {
+				
+			$scope.$location = $location;
+			$scope.$mdMenu = $mdMenu;
+			$scope.Player = Player;
+			
+			$scope.createNewQueue = function(dataType, i, item) {
+				var source = $scope.searchResults[dataType][i];
+				
+				Socket.emit('queue:create', {dataType: dataType, i: i, item: item, source: source});
+				Player.createNewQueue(dataType, i, item, source);
+			};
+			
+			$scope.playTrack = function(track) {
+				Socket.emit('track:play', {track: track});
+				Player.playTrack(track);
+			};
+			
+			$scope.playTrackFromIndex = function(index) {
+				Socket.emit('track:play.index', {index: index});
+				
+				Player.playTrackFromIndex(index);
+			};
+			
+			$scope.skipTrack = function() {
+				Socket.emit('track:ended');
+				Player.skipTrack();
+			};
+			
+			$scope.openLyrics = function(event) {
+				Socket.emit('lyrics:open', {event: event});
+				
+				var track = Player.queue.tracks[Player.queue.nowPlaying.index];
+				$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
+					$mdDialog.show({
+						parent: angular.element(document.body),
+						targetEvent: event,
+						template:
+						   `<h3>Lyrics:</h3>
+							<p style="white-space: pre;">
+								{{track.lyrics}}
+							</p>
+							<p>
+								Lyrics from
+								<a href="{{track.url}}" target="_blank">MetroLyrics</a>
+							</p>`,
+						locals: {
+							
+						},
+						controller: ['$scope', function($scope) {
+							$scope.track = response.data;
+						}],
+						clickOutsideToClose: true
+					});
+				});
 			};
 			
 			$scope.search = function(query, limit, offset) {
@@ -205,70 +343,6 @@
 					.then(function(response) {
 						return response.data.body.tracks.items;
 					});
-			};
-			
-			$scope.createNewQueue = function(dataType, i, item) {
-				var promise;
-				
-				switch (dataType) {
-					case 'albums':
-						promise = $http.get('/api/albums/'+item.id+'/tracks');
-						break;
-					case 'playlists':
-						promise = $http.get('/api/users/'+item.owner.id+'/playlists/'+item.id+'/tracks');
-						break;
-				}
-				
-				promise.then(function(response) {
-					$scope.queue.source = $scope.searchResults[dataType][i];
-					$scope.queue.tracks = (dataType == 'playlists' ? response.data.items.map(o => o.track) : response.data.items);
-					$scope.queue.nowPlaying.index = 0;
-					$scope.playTrack($scope.queue.tracks[0]);
-				});
-			};
-
-			$scope.playTrack = function(track) {
-				var artistName = track.artists[0].name,
-					trackName = track.name;
-				
-				$scope.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
-				$scope.$apply();
-			};
-			
-			$scope.playTrackFromIndex = function(index) {
-				$scope.queue.nowPlaying.index = index;
-				$scope.playTrack($scope.queue.tracks[index]);
-			};
-			
-			$scope.openLyrics = function(event) {
-				var track = $scope.queue.tracks[$scope.queue.nowPlaying.index];
-				$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
-					$mdDialog.show({
-						parent: angular.element(document.body),
-						targetEvent: event,
-						template:
-						   `<h3>Lyrics:</h3>
-							<p style="white-space: pre;">
-								{{track.lyrics}}
-							</p>
-							<p>
-								Lyrics from
-								<a href="{{track.url}}" target="_blank">MetroLyrics</a>
-							</p>`,
-						locals: {
-							
-						},
-						controller: ['$scope', function($scope) {
-							$scope.track = response.data;
-						}],
-						clickOutsideToClose: true
-					});
-				});
-			};
-			
-			document.getElementById('song').onended = function() {
-				$scope.queue.nowPlaying.index++;
-			    $scope.playTrackFromIndex($scope.queue.nowPlaying.index);
 			};
 		}]);
 		

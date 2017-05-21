@@ -19,6 +19,7 @@
     "method-override": "^2.3.7",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
+    "socket.io": "^2.0.1",
     "spotify-web-api-node": "^2.3.6",
     "ytdl-core": "^0.8.1"
   },
