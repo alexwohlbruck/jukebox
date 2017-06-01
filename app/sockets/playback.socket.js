@@ -1,46 +1,67 @@
 module.exports = function(io) {
-    var connectedClients = 0;
     var queue = {
+        source: {
+            id: null,
+            type: null,
+            /* other spotify data */
+        },
+        tracks: [],
         nowPlaying: {
-        	index: 0
+            index: 0,
+            track: null,
+            progress: 0
         }
     };
     
     io.on('connection', client => {
-        connectedClients++;
         
-        client.emit('queue:create', queue);
+		client.on('connection:ping', function() {
+			client.emit('connection:pong');
+		});
         
-        client.on('queue:create', data => {
-            queue = data;
-            client.broadcast.emit('queue:create', data);
+        client.emit('queue:set', queue);
+        
+        client.on('queue:set', newQueue => {
+            console.log('queue set');
+            queue = Object.assign(queue, newQueue);
+            io.emit('queue:set', queue);
         });
         
-        var clientsThatCanPlay = 0;
+        var clientsThatCanPlay = 0, canPlayTimeout;
         
-        client.on('track:play', data => {
-            client.broadcast.emit('track:play', data);
-        });
-        
-        client.on('track:canplay', data => {
-            clientsThatCanPlay++;
-            console.log('can play #: ' + clientsThatCanPlay)
-            
-            if (clientsThatCanPlay >= connectedClients) {
-                console.log('play it');
-                clientsThatCanPlay = 0;
+        client.on('playback:canplay', data => {
+            io.clients((error, clients) => {
                 
-                client.emit('playback:play', data);
-            }
+                var totalClients = clients.length;
+                
+                if (clientsThatCanPlay == 0) {
+                    canPlayTimeout = setTimeout(function() {
+                        // Boot slow loading devices
+                        console.log((totalClients - clientsThatCanPlay) + ' are taking too long, playing now')
+                        client.emit('playback:play');
+                    }, 3000);
+                }
+                
+                clientsThatCanPlay++;
+            
+                console.log(clients[0]);
+                console.log(clientsThatCanPlay + '/' + totalClients + ' can play');
+                
+                if (clientsThatCanPlay >= totalClients) {
+                    clientsThatCanPlay = 0;
+                    clearTimeout(canPlayTimeout);
+                    
+                    client.emit('playback:play', data);
+                }
+            });
         });
         
         client.on('playback:play', () => {
-            console.log('play it');
-            client.broadcast.emit('playback:play');
+            io.emit('playback:play');
         });
         
         client.on('playback:pause', () => {
-            client.broadcast.emit('playback:pause');
+            io.emit('playback:pause');
         });
         
         client.on('track:play.index', data => {
@@ -49,10 +70,6 @@ module.exports = function(io) {
         
         client.on('track:ended', () => {
             client.broadcast.emit('track:ended');
-        });
-        
-        client.on('disconnect', () => {
-            connectedClients--;
         });
     });
 };

@@ -7,6 +7,7 @@ var env = process.env.NODE_ENV;
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
+var expressGeoIP = require('express-geoip');
 
 if (env === 'development') {
 	var morgan = require('morgan');
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(expressGeoIP('US').getCountryCodeMiddleware);
     
 app.use('/api', require('./app/routes'));
 app.use('/', express.static('public'));
