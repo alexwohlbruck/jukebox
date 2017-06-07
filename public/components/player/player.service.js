@@ -1,5 +1,5 @@
 /* global angular */
-var app = angular.module('music');
+var app = angular.module('jukebox');
 
 app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($rootScope, Socket, $http, $mdToast) {
 	var Player = this;
@@ -37,7 +37,6 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	this.setQueue = function(newQueue) {
 		var promise;
 		this.queue = Object.assign(this.queue, newQueue);
-		console.log(this.queue);
 		
 		switch (newQueue.source.type) {
 			case 'album':
@@ -54,7 +53,6 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 		}
 		
 		promise.then(function(response) {
-			console.log(response);
 			Player.queue = newQueue;
 			switch (newQueue.source.type) {
 				case 'playlist':
@@ -63,6 +61,7 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 				case 'album':
 					Player.queue.tracks = response.data.items;
 				case 'artist':
+					break;
 				default:
 					Player.queue.tracks = response.data.tracks;
 					break;

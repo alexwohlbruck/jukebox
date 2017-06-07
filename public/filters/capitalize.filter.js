@@ -1,5 +1,5 @@
 /* global angular */
-var app = angular.module('music');
+var app = angular.module('jukebox');
 
 app.filter('capitalize', function() {
 	return function(token) {

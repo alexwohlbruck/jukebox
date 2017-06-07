@@ -4,9 +4,10 @@
 			Jukebox Redux
 		</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<style>
 			.track {
 				margin: 5px;
@@ -145,20 +146,49 @@
 			</div>
 		</div>
 		
-		<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="Player.queue.nowPlaying.streamUrl">
-			<md-card flex="100" flex-gt-sm="70" layout="row">
-				<audio
-					id="song"
-					controls
-					ng-src="{{Player.queue.nowPlaying.streamUrl}}"
-					style="width: 100% !important;">
-				</audio>
+		<audio
+			id="song"
+			ng-src="{{Player.queue.nowPlaying.streamUrl}}">
+		</audio>
+		
+		
+		<div class="player" layout="row" layout-align="center start">
+			<md-card class="player" flex="100" style="height: 100px; margin: 0; background: #325767;" layout="row">
+				<div class="cover" style="background-image: url('{{Player.queue.source.images[0].url}}'); background-size: cover; background-position: center; width: 100px;"></div>
 				
-				<md-button class="md-icon-button" ng-click="openLyrics($event)">
-					<md-icon class="material-icons">music_note</md-icon>
-				</md-button>
+				<div layout="column" flex>
+					<seek-bar audio="Player.el"></seek-bar>
+					
+					<div>
+						
+						
+						
+						<p id="now-playing-title" class="md-body-2">{{Player.queue.tracks[Player.queue.nowPlaying.index].name}}</p>
+						<p id="now-playing-subtitle" class="md-caption">
+							<a ui-sref="artist({artistID: nowPlaying.track.artists[0].id})">{{Player.queue.tracks[Player.queue.nowPlaying.index].artists[0].name}}</a>
+							-
+							<a ui-sref="album({albumID: nowPlaying.track.album.id})">{{Player.queue.source.name}}</a>
+						</p>
+					</div>
+				</div>
 			</md-card>
 		</div>
+		
+		<!--<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="Player.queue.nowPlaying.streamUrl">
+			<md-card flex="100" flex-gt-sm="70" layout="row">
+				<img style="width: 75px; height: auto;" ng-src="https://upload.wikimedia.org/wikipedia/en/4/42/Kodaline_-_In_A_Perfect_World.jpg">
+				
+				<div flex>
+					<seek-bar audio="Player.el"></seek-bar>
+					
+					
+				</div>
+			</md-card>
+		</div>
+		
+		<md-button class="md-icon-button" ng-click="openLyrics($event)">
+			<md-icon class="material-icons">music_note</md-icon>
+		</md-button>-->
 		
 		<!-- Angular Material requires Angular.js Libraries -->
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
@@ -175,10 +205,10 @@
 		<!-- Your application bootstrap  -->
 		<script type="text/javascript">
 			/* global angular */
-			var app = angular.module('jukebox', ['ngMaterial', 'ngAudio', 'btford.socket-io']);
+			var app = angular.module('jukebox', ['ngMaterial', 'btford.socket-io']);
 
-			app.controller('MainCtrl', ['$scope', '$rootScope', '$http', 'ngAudio', '$location', '$mdMenu', '$mdDialog', '$mdToast', 'Socket', 'Player',
-				function($scope, $rootScope, $http, ngAudio, $location, $mdMenu, $mdDialog, $mdToast, Socket, Player) {
+			app.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$location', '$mdMenu', '$mdDialog', '$mdToast', 'Socket', 'Player',
+				function($scope, $rootScope, $http, $location, $mdMenu, $mdDialog, $mdToast, Socket, Player) {
 					
 				$scope.$location = $location;
 				$scope.$mdMenu = $mdMenu;
@@ -241,13 +271,15 @@
 			}]);
 		</script>
 		
+		<script type="text/javascript" src="components/seekbar/seekbar.directive.js"></script>
+		
+		<script type="text/javascript" src="components/socket/socket.factory.js"></script>
+		
 		<script type="text/javascript" src="components/player/player.service.js"></script>
 		
-		<script type="text/javascript" src="services/socket.factory.js"></script>
-		
-		<script type="text/javascript" src="components/progress-bar/progress-bar.directive.js"></script>
-		
 		<script type="text/javascript" src="filters/capitalize.filter.js"></script>
+		
+		<script type="text/javascript" src="filters/seconds-time.filter.js"></script>
 		
 	</body>
 	</html>
