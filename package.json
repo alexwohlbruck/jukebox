@@ -26,6 +26,10 @@
     "ytdl-core": "^0.8.1"
   },
   "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "^3.0.1",
     "morgan": "^1.8.0",
     "nodemon": "^1.11.0"
   }

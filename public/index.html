@@ -60,7 +60,12 @@
 			
 		</style>
 	</head>
-	<body ng-cloak layout="column" layout-align="space-between stretch" style="height: 100vh;">
+	<body ng-cloak layout="column" layout-align="start stretch">
+		
+		<audio
+			id="song"
+			ng-src="{{Player.queue.nowPlaying.streamUrl}}">
+		</audio>
 
 		<md-toolbar class="md-hue-2" md-whiteframe="3dp">
 			<form ng-submit="search(searchText)" class="margin-0">
@@ -100,8 +105,6 @@
 	    </md-toolbar>
 		
 		<div layout="row" flex>
-			<md-button class="md-raised" ng-click="Player.plause()">{{Player.el.paused ? 'Play' : 'Pause'}}</md-button>
-			
 			<div layout="row" layout-align="space-around stretch" flex ng-show="searchResults">
 				<div flex ng-repeat="section in ['albums', 'artists', 'playlists']"  class="scroll-container">
 					<md-list flex>
@@ -142,70 +145,84 @@
 							<h3>{{track.name}}</h3>
 							<p>{{track.artists[0].name}}</p>
 						</div>
-				</md-list>			
+					</md-list-item>
+				</md-list>
 			</div>
 		</div>
 		
-		<audio
-			id="song"
-			ng-src="{{Player.queue.nowPlaying.streamUrl}}">
-		</audio>
+		<div layout="row" layout-align="center start">
+			<md-card
+				class="player md-whiteframe-4dp"
+				flex="100"
+				style="height: 100px;"
+				layout="row"
+				ng-style="{'background-color': (Player.queue.nowPlaying.swatches.Vibrant | vibrantRgb)}">
 		
-		
-		<div class="player" layout="row" layout-align="center start">
-			<md-card class="player" flex="100" style="height: 100px; margin: 0; background: #325767;" layout="row">
-				<div class="cover" style="background-image: url('{{Player.queue.source.images[0].url}}'); background-size: cover; background-position: center; width: 100px;"></div>
+				<img ng-src="{{Player.queue.tracks[Player.queue.nowPlaying.index].album.images[0].url}}" vibrant ng-model="Player.queue.nowPlaying.swatches" crossOrigin="anonymous" style="width: 100px;"/>
 				
 				<div layout="column" flex>
 					<seek-bar audio="Player.el"></seek-bar>
 					
-					<div>
+					<div class="controls" layout="row" layout-align="space-between center" flex>
+						<div class="left md-padding">
+							<p class="title md-body-2">{{Player.queue.tracks[Player.queue.nowPlaying.index].name}}</p>
+							<p class="detail md-caption">
+								<a ui-sref="artist({artistID: nowPlaying.track.artists[0].id})">{{Player.queue.tracks[Player.queue.nowPlaying.index].artists[0].name}}</a>
+								-
+								<a ui-sref="album({albumID: nowPlaying.track.album.id})">{{Player.queue.source.name}}</a>
+							</p>
+						</div>
 						
+						<div class="center">
+							<md-button class="md-icon-button" aria-label="Loop song">
+								<md-icon class="material-icons">loop</md-icon>
+							</md-button>
+							
+							<md-button class="md-icon-button" aria-label="Skip previous">
+								<md-icon class="material-icons">skip_previous</md-icon>
+							</md-button>
+							
+							<md-button class="md-icon-button" aria-label="Play/Pause" ng-click="Player.plause()">
+								<md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
+							</md-button>
+							
+							<md-button class="md-icon-button" aria-label="Skip next">
+								<md-icon class="material-icons">skip_next</md-icon>
+							</md-button>
+							
+							<md-button class="md-icon-button" aria-label="Shuffle">
+								<md-icon class="material-icons">shuffle</md-icon>
+							</md-button>
+						</div>
 						
-						
-						<p id="now-playing-title" class="md-body-2">{{Player.queue.tracks[Player.queue.nowPlaying.index].name}}</p>
-						<p id="now-playing-subtitle" class="md-caption">
-							<a ui-sref="artist({artistID: nowPlaying.track.artists[0].id})">{{Player.queue.tracks[Player.queue.nowPlaying.index].artists[0].name}}</a>
-							-
-							<a ui-sref="album({albumID: nowPlaying.track.album.id})">{{Player.queue.source.name}}</a>
-						</p>
+						<div class="right">
+							<md-button class="md-icon-button" aria-label="Open Lyrics" ng-click="openLyrics($event)">
+								<md-icon class="material-icons">music_note</md-icon>
+							</md-button>
+						</div>
 					</div>
 				</div>
 			</md-card>
 		</div>
 		
-		<!--<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="Player.queue.nowPlaying.streamUrl">
-			<md-card flex="100" flex-gt-sm="70" layout="row">
-				<img style="width: 75px; height: auto;" ng-src="https://upload.wikimedia.org/wikipedia/en/4/42/Kodaline_-_In_A_Perfect_World.jpg">
-				
-				<div flex>
-					<seek-bar audio="Player.el"></seek-bar>
-					
-					
-				</div>
-			</md-card>
-		</div>
-		
-		<md-button class="md-icon-button" ng-click="openLyrics($event)">
-			<md-icon class="material-icons">music_note</md-icon>
-		</md-button>-->
-		
 		<!-- Angular Material requires Angular.js Libraries -->
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
 
 		<!-- Angular Material Library -->
-		<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
 		
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> <!-- Socket.io -->
-		<script src="https://cdn.rawgit.com/btford/angular-socket-io/master/socket.js"></script> <!-- Angular Socket.io -->
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> <!-- Socket.io -->
+		<script type="text/javascript" src="https://cdn.rawgit.com/btford/angular-socket-io/master/socket.js"></script> <!-- Angular Socket.io -->
+		<script type="text/javascript" src="https://cdn.rawgit.com/jariz/vibrant.js/master/dist/Vibrant.js"></script>
+		<script type="text/javascript" src="https://cdn.rawgit.com/maxjoehnk/ngVibrant/fd9c068d/dist/angular-vibrant.js"></script>
 
 		<!-- Your application bootstrap  -->
 		<script type="text/javascript">
 			/* global angular */
-			var app = angular.module('jukebox', ['ngMaterial', 'btford.socket-io']);
+			var app = angular.module('jukebox', ['ngMaterial', 'btford.socket-io', 'ngVibrant']);
 
 			app.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$location', '$mdMenu', '$mdDialog', '$mdToast', 'Socket', 'Player',
 				function($scope, $rootScope, $http, $location, $mdMenu, $mdDialog, $mdToast, Socket, Player) {
@@ -278,8 +295,8 @@
 		<script type="text/javascript" src="components/player/player.service.js"></script>
 		
 		<script type="text/javascript" src="filters/capitalize.filter.js"></script>
-		
 		<script type="text/javascript" src="filters/seconds-time.filter.js"></script>
+		<script type="text/javascript" src="filters/vibrant-rgb.filter.js"></script>
 		
 	</body>
 	</html>

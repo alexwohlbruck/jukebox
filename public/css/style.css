@@ -1,0 +1,129 @@
+.player {
+	margin: 0;
+}
+
+.player .controls .left {
+	margin-right: auto;
+}
+
+.player .controls .left .title, .player .controls .left .detail {
+	color: white;
+	margin: 0;
+}
+
+.player .controls .center {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.player .controls .right {
+	margin-left: auto;
+}
+
+seek-bar {
+	position: relative;
+}
+
+seek-bar .buffer {
+	position: absolute;
+	height: 23px;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+seek-bar .container {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+seek-bar .container .time {
+	color: rgba(255, 255, 255, 0.8);
+	font-weight: 500;
+	font-size: 9pt;
+	padding: 0px 10px;
+	position: relative;
+}
+
+seek-bar .container body {
+	background: #18d;
+	margin: 0;
+}
+
+seek-bar .container input[type=range] {
+	z-index: 1;
+	-webkit-appearance: none;
+	width: 100%;
+	margin: 0px 0;
+	background: none;
+}
+
+seek-bar .container input[type=range]:focus {
+	outline: none;
+}
+
+seek-bar .container input[type=range]::-webkit-slider-runnable-track {
+	width: 100%;
+	height: 23px;
+	cursor: pointer;
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+	background: transparent;
+	border-radius: 0px;
+	border: 0px solid #000000;
+}
+
+seek-bar .container input[type=range]::-webkit-slider-thumb {
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+	border: 0px solid #000000;
+	height: 23px;
+	width: 10px;
+	border-radius: 0px;
+	background: rgba(255, 255, 255, 0.8);
+	cursor: pointer;
+	-webkit-appearance: none;
+	margin-top: 0px;
+}
+
+seek-bar .container input[type=range]::-moz-range-track {
+	width: 100%;
+	height: 23px;
+	cursor: pointer;
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+	background: transparent;
+	border-radius: 0px;
+	border: 0px solid #000000;
+}
+
+seek-bar .container input[type=range]::-moz-range-thumb {
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+	border: 0px solid #000000;
+	height: 23px;
+	width: 10px;
+	border-radius: 0px;
+	background: rgba(255, 255, 255, 0.8);
+	cursor: pointer;
+}
+
+seek-bar .container input[type=range]::-ms-track {
+	width: 100%;
+	height: 23px;
+	cursor: pointer;
+	background: transparent;
+	border-color: transparent;
+	color: transparent;
+}
+
+seek-bar .container input[type=range]::-ms-fill-lower, seek-bar .container input[type=range]::-ms-fill-upper {
+	background: transparent;
+	border: 0px solid #000000;
+	border-radius: 0px;
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+
+seek-bar .container input[type=range]::-ms-thumb {
+	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+	border: 0px solid #000000;
+	width: 10px;
+	border-radius: 0px;
+	background: rgba(255, 255, 255, 0.8);
+	cursor: pointer;
+	height: 23px;
+}
