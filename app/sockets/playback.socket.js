@@ -64,6 +64,14 @@ module.exports = function(io) {
             io.emit('playback:pause');
         });
         
+        client.on('playback:skip.next', () => {
+            io.emit('playback:skip.next');
+        });
+
+        client.on('playback:skip.prev', () => {
+            io.emit('playback:skip.prev');
+        });
+        
         client.on('track:play.index', data => {
             client.broadcast.emit('track:play.index', data);
         });

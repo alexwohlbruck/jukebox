@@ -125,9 +125,27 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	    Player.playTrackFromIndex(Player.queue.nowPlaying.index);
 	};
 	
+	this.skipNext = function() {
+		Socket.emit('playback:skip.next');
+	};
+	
+	Socket.on('playback:skip.next', function() {
+		Player.queue.nowPlaying.index++;
+	    Player.playTrackFromIndex(Player.queue.nowPlaying.index);
+	});
+	
+	this.skipPrev = function() {
+		Socket.emit('playback:skip.prev');
+	};
+	
+	Socket.on('playback:skip.prev', function() {
+		Player.queue.nowPlaying.index--;
+		Player.playTrackFromIndex(Player.queue.nowPlaying.index);
+	});
+	
 	Player.el.addEventListener('canplay', function() {
 		Socket.emit('playback:canplay');
-	})
+	});
 	
 	Socket.on('playback:ended', function() {
 		Player.el.skipTrack();

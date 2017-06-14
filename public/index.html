@@ -178,7 +178,7 @@
 								<md-icon class="material-icons">loop</md-icon>
 							</md-button>
 							
-							<md-button class="md-icon-button" aria-label="Skip previous">
+							<md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skipPrev()">
 								<md-icon class="material-icons">skip_previous</md-icon>
 							</md-button>
 							
@@ -186,7 +186,7 @@
 								<md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
 							</md-button>
 							
-							<md-button class="md-icon-button" aria-label="Skip next">
+							<md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skipNext()">
 								<md-icon class="material-icons">skip_next</md-icon>
 							</md-button>
 							
