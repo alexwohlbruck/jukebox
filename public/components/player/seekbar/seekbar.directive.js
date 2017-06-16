@@ -1,7 +1,7 @@
 /* global angular */
 var app = angular.module('jukebox');
 
-app.directive('seekBar', ['$document', 'Player', function($document) {
+app.directive('seekbar', ['$document', 'Player', function($document) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -29,6 +29,6 @@ app.directive('seekBar', ['$document', 'Player', function($document) {
 				}
 			});
 		},
-		templateUrl: 'components/seekbar/seekbar.directive.html'
+		templateUrl: 'components/player/seekbar/seekbar.directive.html'
 	};
 }]);

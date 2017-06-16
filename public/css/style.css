@@ -1,41 +1,50 @@
-.player {
+playbar md-card {
 	margin: 0;
+	height: 100px;
+	transition: ease-in-out background 500ms;
 }
 
-.player .controls .left {
+playbar .cover {
+	width: 100px;
+}
+
+playbar .controls p, playbar .controls span, playbar .controls a {
+	transition: ease-in-out color 500ms;
+}
+
+playbar .controls .left {
 	margin-right: auto;
 }
 
-.player .controls .left .title, .player .controls .left .detail {
-	color: white;
+playbar .controls .left .title, playbar .controls .left .detail {
 	margin: 0;
 }
 
-.player .controls .center {
+playbar .controls .center {
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
 }
 
-.player .controls .right {
+playbar .controls .right {
 	margin-left: auto;
 }
 
-seek-bar {
+seekbar {
 	position: relative;
 }
 
-seek-bar .buffer {
+seekbar .buffer {
 	position: absolute;
 	height: 23px;
 	background: rgba(255, 255, 255, 0.08);
 }
 
-seek-bar .container {
+seekbar .container {
 	background: rgba(0, 0, 0, 0.5);
 }
 
-seek-bar .container .time {
+seekbar .container .time {
 	color: rgba(255, 255, 255, 0.8);
 	font-weight: 500;
 	font-size: 9pt;
@@ -43,12 +52,12 @@ seek-bar .container .time {
 	position: relative;
 }
 
-seek-bar .container body {
+seekbar .container body {
 	background: #18d;
 	margin: 0;
 }
 
-seek-bar .container input[type=range] {
+seekbar .container input[type=range] {
 	z-index: 1;
 	-webkit-appearance: none;
 	width: 100%;
@@ -56,11 +65,11 @@ seek-bar .container input[type=range] {
 	background: none;
 }
 
-seek-bar .container input[type=range]:focus {
+seekbar .container input[type=range]:focus {
 	outline: none;
 }
 
-seek-bar .container input[type=range]::-webkit-slider-runnable-track {
+seekbar .container input[type=range]::-webkit-slider-runnable-track {
 	width: 100%;
 	height: 23px;
 	cursor: pointer;
@@ -70,7 +79,7 @@ seek-bar .container input[type=range]::-webkit-slider-runnable-track {
 	border: 0px solid #000000;
 }
 
-seek-bar .container input[type=range]::-webkit-slider-thumb {
+seekbar .container input[type=range]::-webkit-slider-thumb {
 	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 	border: 0px solid #000000;
 	height: 23px;
@@ -82,7 +91,7 @@ seek-bar .container input[type=range]::-webkit-slider-thumb {
 	margin-top: 0px;
 }
 
-seek-bar .container input[type=range]::-moz-range-track {
+seekbar .container input[type=range]::-moz-range-track {
 	width: 100%;
 	height: 23px;
 	cursor: pointer;
@@ -92,7 +101,7 @@ seek-bar .container input[type=range]::-moz-range-track {
 	border: 0px solid #000000;
 }
 
-seek-bar .container input[type=range]::-moz-range-thumb {
+seekbar .container input[type=range]::-moz-range-thumb {
 	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 	border: 0px solid #000000;
 	height: 23px;
@@ -102,7 +111,7 @@ seek-bar .container input[type=range]::-moz-range-thumb {
 	cursor: pointer;
 }
 
-seek-bar .container input[type=range]::-ms-track {
+seekbar .container input[type=range]::-ms-track {
 	width: 100%;
 	height: 23px;
 	cursor: pointer;
@@ -111,14 +120,14 @@ seek-bar .container input[type=range]::-ms-track {
 	color: transparent;
 }
 
-seek-bar .container input[type=range]::-ms-fill-lower, seek-bar .container input[type=range]::-ms-fill-upper {
+seekbar .container input[type=range]::-ms-fill-lower, seekbar .container input[type=range]::-ms-fill-upper {
 	background: transparent;
 	border: 0px solid #000000;
 	border-radius: 0px;
 	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 }
 
-seek-bar .container input[type=range]::-ms-thumb {
+seekbar .container input[type=range]::-ms-thumb {
 	box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 	border: 0px solid #000000;
 	width: 10px;

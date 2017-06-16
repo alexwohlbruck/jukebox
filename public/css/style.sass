@@ -1,12 +1,20 @@
-.player
-	margin: 0
-
+playbar
+	md-card
+		margin: 0
+		height: 100px
+		transition: ease-in-out background 500ms
+		
+	.cover
+		width: 100px
+		
 	.controls
+		p, span, a
+			transition: ease-in-out color 500ms
+			
 		.left
 			margin-right: auto
 			
 			.title, .detail
-				color: white
 				margin: 0
 				
 		.center
@@ -16,8 +24,9 @@
 				
 		.right
 			margin-left: auto
+	
 
-seek-bar
+seekbar
 	position: relative
 	
 	.buffer

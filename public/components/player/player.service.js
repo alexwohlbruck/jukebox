@@ -111,6 +111,7 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 		
 		Player.queue.nowPlaying.index = index;
 		Player.playTrack(Player.queue.tracks[index]);
+	    Player.updateVibrantSwatches();
 	};
 	
 	Socket.on('track:play.index', function(data) {
@@ -136,6 +137,15 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	
 	this.skipPrev = function() {
 		Socket.emit('playback:skip.prev');
+	};
+	
+	this.updateVibrantSwatches = function() {
+		// Nested RAF to wait for Vibrant to load
+		window.requestAnimationFrame(function() {
+			window.requestAnimationFrame(function() {
+				Player.queue.nowPlaying.theme = Player.queue.nowPlaying.swatches.Vibrant.getBodyTextColor() == '#000' ? 'light' : 'dark';
+			});
+		});
 	};
 	
 	Socket.on('playback:skip.prev', function() {
