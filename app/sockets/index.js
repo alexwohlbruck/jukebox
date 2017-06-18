@@ -1,3 +1,3 @@
 module.exports = function(io) {
-    require('./playback.socket')(io);
+    require('./player.socket')(io);
 };

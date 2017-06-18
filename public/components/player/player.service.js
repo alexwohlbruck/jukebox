@@ -91,7 +91,7 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	});
 	
 	
-	this.playTrack = function(track) {
+	/*this.playTrack = function(track) {
 		// Infinite recursion on multiclient playback -- fix this!
 		Socket.emit('track:play', {track: track});
 		
@@ -116,7 +116,7 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	
 	Socket.on('track:play.index', function(data) {
 		Player.playTrackFromIndex(data.index);
-	});
+	});*/
 	
 	
 	this.skipTrack = function() {
