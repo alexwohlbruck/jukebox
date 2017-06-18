@@ -1,5 +1,5 @@
 <md-card
-	class="player md-whiteframe-16dp"
+	class="player md-whiteframe-6dp"
 	flex="100"
 	layout="row"
 	md-theme="{{Player.queue.nowPlaying.theme}}" md-theme-watch
@@ -29,7 +29,7 @@
 					<md-icon class="material-icons">loop</md-icon>
 				</md-button>
 				
-				<md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skipPrev()">
+				<md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skip('prev')">
 					<md-icon class="material-icons">skip_previous</md-icon>
 				</md-button>
 				
@@ -37,7 +37,7 @@
 					<md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
 				</md-button>
 				
-				<md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skipNext()">
+				<md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skip('next')">
 					<md-icon class="material-icons">skip_next</md-icon>
 				</md-button>
 				

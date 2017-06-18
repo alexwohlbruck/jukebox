@@ -17,7 +17,6 @@ module.exports = function(io) {
         
         
         setQueue(newQueue)  {
-            console.log(this)
             this.queue = Object.assign(this.queue, newQueue);
         },
         
@@ -28,8 +27,17 @@ module.exports = function(io) {
         
         skip(direction) {
             // ?TODO: Update data for 'this.queue.nowPlaying.track'
-            direction == 'next' ? this.queue.nowPlaying.index++ : this.queue.nowPlaying.index--;
-            io.emit(`playback:skip.${direction}`);
+            if (direction == 'next') {
+                if (this.queue.nowPlaying.index < this.queue.tracks.length - 1) {
+                    this.queue.nowPlaying.index++;
+                    io.emit('playback:skip.next');
+                }
+            } else if (direction == 'prev') {
+                if (this.queue.nowPlaying.index > 0) {
+                    this.queue.nowPlaying.index--;
+                    io.emit('playback:skip.prev');
+                }
+            }
         },
         
         setVolume() {

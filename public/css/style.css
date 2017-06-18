@@ -8,6 +8,10 @@ playbar .cover {
 	width: 100px;
 }
 
+playbar .controls {
+	position: relative;
+}
+
 playbar .controls p, playbar .controls span, playbar .controls a {
 	transition: ease-in-out color 500ms;
 }

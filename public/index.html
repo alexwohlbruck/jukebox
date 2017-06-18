@@ -1,4 +1,4 @@
-	<html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
+<html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
 	<head>
 		<title ng-bind="queue.nowPlaying.streamUrl ? (queue.tracks[queue.nowPlaying.index].name + ' - ' + queue.tracks[queue.nowPlaying.index].artists[0].name) : 'Jukebox Redux'">
 			Jukebox Redux
@@ -8,149 +8,84 @@
 		<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-		<style>
-			.track {
-				margin: 5px;
-			}
-			.track-desc {
-				padding-left: 10px;
-				padding-top: 12px;
-			}
-			.track-desc p {
-				margin: 0; padding: 0;
-			}
-			
-			.playerBar {
-				width: 100%;
-			}
-			.playerBar > md-card {
-				margin-bottom: 0;
-			}
-			
-			.autocomplete-custom-template .track, .autocomplete-custom-template .artist {
-				padding: 0;
-				margin: 0;
-			}
-			
-			.margin-0 {
-				margin: 0 !important;
-			}
-			
-			.padding-sides {
-				padding: 0px 16px;
-			}
-			
-			.md-avatar.no-mask {
-				border-radius: 0 !important;
-			}
-			
-			.md-avatar {
-				width: 40px;
-				height: 40px;
-				border-radius: 50%;
-			}
-			.md-avatar.large {
-				width: 60px;
-				height: 60px;
-			}
-			
-			.scroll-container {
-				overflow-y: scroll;
-			}
-			
-		</style>
 	</head>
-	<body ng-cloak layout="column" layout-align="start stretch">
+	
+	<body ng-cloak layout="row">
 		
 		<audio
 			id="song"
 			ng-src="{{Player.queue.nowPlaying.streamUrl}}">
 		</audio>
-
-		<md-toolbar class="md-hue-2" md-whiteframe="3dp">
-			<form ng-submit="search(searchText)" class="margin-0">
-				<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
-					<h2 flex="10" md-truncate>Jukebox</h2>
-					
-					<p>Latency: {{Player.latency}}</p>
-					
-					<md-autocomplete
-						flex="40"
-						ng-disabled="isDisabled"
-						md-items="track in loadSuggestions(searchText)"
-						md-item-text="track.name"
-						md-no-cache="noCache"
-						md-selected-item="selectedItem"
-						md-search-text="searchText"
-						md-selected-item-change="playTrack(track)"
-						md-min-length="0"
-						md-delay="100"
-						md-menu-class="search-suggestion"
-						placeholder="Search a song, artist, or album">
-						
-						<md-item-template ng-click="Player.playTrack(track)">
-							<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
-							<br/>
-							<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
-						</md-item-template>
-						
-						<md-not-found>
-							Sorry, we couldn't find <strong>{{searchText}}</strong>
-						</md-not-found>
-					</md-autocomplete>
-					
-					<span flex="10"></span>
-				</div>
-			</form>
-	    </md-toolbar>
 		
-		<md-content layout="row" flex>
-			<div flex layout="row" layout-align="space-around stretch">
-				<div ng-show="searchResults" flex ng-repeat="section in ['albums', 'artists', 'playlists']" class="scroll-container">
-					<md-list flex>
-						<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
+		<section layout="column" flex>
+
+			<md-toolbar class="md-hue-2" md-whiteframe="3dp">
+				<form ng-submit="search(searchText)" class="margin-0">
+					<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
+						<h2 flex="10" md-truncate>Jukebox</h2>
 						
-						<md-list-item class="md-2-line" ng-repeat="item in searchResults[section]" ng-click="setQueue(section, $index, item)">
-							<img ng-src="{{item.images[0].url}}" class="md-avatar no-mask" alt="{{todos[0].who}}"/>
+						<p>Latency: {{Player.latency}}</p>
+						
+						<md-autocomplete
+							flex="40"
+							ng-disabled="isDisabled"
+							md-items="track in loadSuggestions(searchText)"
+							md-item-text="track.name"
+							md-no-cache="noCache"
+							md-selected-item="selectedItem"
+							md-search-text="searchText"
+							md-selected-item-change="playTrack(track)"
+							md-min-length="0"
+							md-delay="100"
+							md-menu-class="search-suggestion"
+							placeholder="Search a song, artist, or album">
 							
-							<div class="md-list-item-text">
-								<h3>{{item.name}}</h3>
-								<p>{{item.artists[0].name || item.owner.id}}</p>
-							</div>
-						</md-list-item>
-					</md-list>
-				</div>
-			</div>
+							<md-item-template ng-click="Player.playTrack(track)">
+								<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
+								<br/>
+								<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
+							</md-item-template>
+							
+							<md-not-found>
+								Sorry, we couldn't find <strong>{{searchText}}</strong>
+							</md-not-found>
+						</md-autocomplete>
+						
+						<span flex="10"></span>
+					</div>
+				</form>
+		    </md-toolbar>
 			
-			<div flex="30" ng-show="Player.queue.source" class="padding-sides scroll-container" md-whiteframe="12dp" style="z-index: 1;">
-				<p class="md-body-2">Now Playing</p>
-				
-				<div layout="row">
-					<img ng-src="{{Player.queue.source.images[0].url}}" class="md-avatar large no-mask"/>
-					
-					<div layout="column" style="margin: 5px 15px;">
-						<p class="md-title margin-0">{{Player.queue.source.name}}</p>
-						<p class="md-subhead margin-0">{{Player.queue.source.artists[0].name || Player.queue.source.owner.id}}</p>
+			<md-content layout="row" flex>
+				<div flex layout="row" layout-align="space-around stretch">
+					<div ng-show="searchResults" flex ng-repeat="section in ['albums', 'artists', 'playlists']" class="scroll-container">
+						<md-list flex>
+							<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
+							
+							<md-list-item class="md-2-line" ng-repeat="item in searchResults[section]" ng-click="setQueue(section, $index, item)">
+								<img ng-src="{{item.images[0].url}}" class="md-avatar no-mask" alt="{{todos[0].who}}"/>
+								
+								<div class="md-list-item-text">
+									<h3>{{item.name}}</h3>
+									<p>{{item.artists[0].name || item.owner.id}}</p>
+								</div>
+							</md-list-item>
+						</md-list>
 					</div>
 				</div>
-				
-				<md-list>
-					<md-list-item class="md-2-line" ng-repeat="track in Player.queue.tracks" ng-click="Player.playTrackFromIndex($index)">
-						<img
-							ng-src="{{Player.queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || Player.queue.source.images[0].url)}}"
-							class="md-avatar no-mask"
-							alt="{{track.name}}"/>
-						
-						<div class="md-list-item-text">
-							<h3>{{track.name}}</h3>
-							<p>{{track.artists[0].name}}</p>
-						</div>
-					</md-list-item>
-				</md-list>
-			</div>
-		</md-content>
+			</md-content>
+			
+			<playbar></playbar>
+		</section>
 		
-		<playbar></playbar>
+		<md-sidenav
+			class="md-sidenav-right"
+			md-component-id="right"
+			md-is-locked-open="$mdMedia('gt-md')"
+			md-whiteframe="10">
+			
+			<queue></queue>
+		</md-sidenav>
 		
 		<!-- Angular Material requires Angular.js Libraries -->
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
@@ -245,6 +180,7 @@
 		
 		<script type="text/javascript" src="components/player/playbar/playbar.directive.js"></script>
 		<script type="text/javascript" src="components/player/seekbar/seekbar.directive.js"></script>
+		<script type="text/javascript" src="components/queue/queue.directive.js"></script>
 		
 		<script type="text/javascript" src="components/socket/socket.factory.js"></script>
 		

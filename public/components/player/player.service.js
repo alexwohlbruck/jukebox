@@ -119,25 +119,17 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	});*/
 	
 	
-	this.skipTrack = function() {
-		Socket.emit('track:ended');
-		
-		Player.queue.nowPlaying.index++;
-	    Player.playTrackFromIndex(Player.queue.nowPlaying.index);
-	};
-	
-	this.skipNext = function() {
-		Socket.emit('playback:skip.next');
+	this.skip = function(direction) {
+		Socket.emit('playback:skip.' + direction);
 	};
 	
 	Socket.on('playback:skip.next', function() {
 		Player.queue.nowPlaying.index++;
-	    Player.playTrackFromIndex(Player.queue.nowPlaying.index);
 	});
 	
-	this.skipPrev = function() {
-		Socket.emit('playback:skip.prev');
-	};
+	Socket.on('playback:skip.prev', function() {
+		Player.queue.nowPlaying.index--;
+	});
 	
 	this.updateVibrantSwatches = function() {
 		// Nested RAF to wait for Vibrant to load
@@ -147,11 +139,6 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 			});
 		});
 	};
-	
-	Socket.on('playback:skip.prev', function() {
-		Player.queue.nowPlaying.index--;
-		Player.playTrackFromIndex(Player.queue.nowPlaying.index);
-	});
 	
 	Player.el.addEventListener('canplay', function() {
 		Socket.emit('playback:canplay');
