@@ -6,6 +6,8 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	
 	this.el = document.getElementById('song');
 	
+	this.pinnedQueue = true;
+	
 	this.queue = {
 		nowPlaying: {
 			index: 0
@@ -34,6 +36,8 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
         }
     });
 	
+	
+	//*
 	this.setQueue = function(newQueue) {
 		var promise;
 		this.queue = Object.assign(this.queue, newQueue);
@@ -73,6 +77,13 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	Socket.on('queue:set', function(newQueue) {
 		Player.setQueue(newQueue);
 	});
+	
+	/*/
+	
+	this.setQueue = function() {
+		
+	};/**/
+	
 	
 	this.plause = function() {
 		Socket.emit(Player.el.paused ? 'playback:play' : 'playback:pause');

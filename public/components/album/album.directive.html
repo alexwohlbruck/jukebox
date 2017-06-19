@@ -1,0 +1,19 @@
+<md-card
+    class="container"
+    ng-click="$state.go('album', {album: data.id})"
+    style="width: 150px;"
+    ng-style="{'background-color': data.swatches.Vibrant.getHex() || 'rgb(66,66,66)'}"
+    md-whiteframe="4dp"
+    md-ink-ripple="true">
+    
+    <img
+        ng-src="{{data.images[1].url}}"
+        class="md-card-image"
+        alt="{{data.name}}"
+        vibrant ng-model="data.swatches"
+        crossorigin="anonymous">
+        
+    <md-card-content>
+        <p ng-style="{'color': data.swatches.Vibrant.getBodyTextColor()}">{{data.name}}</p>
+    </md-card-content>
+</md-card>

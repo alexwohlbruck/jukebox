@@ -1,7 +1,7 @@
 /* global angular */
 var app = angular.module('jukebox');
 
-app.directive('queue', ['$document', 'Player', function($document, Player) {
+app.directive('queue', ['Player', function(Player) {
 	return {
 		restrict: 'E',
 		link: function(scope) {

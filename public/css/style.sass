@@ -1,3 +1,114 @@
+// Draft styles
+
+@font-face 
+	font-family: Circular
+	src: url(https://sp-bootstrap.global.ssl.fastly.net/8.0.0/fonts/circular-book.woff2)
+	font-weight: 300
+
+@font-face 
+	font-family: Circular
+	src: url(https://sp-bootstrap.global.ssl.fastly.net/8.0.0/fonts/circular-bold.woff2)
+	font-weight: 500
+
+@font-face 
+	font-family: Circular
+	src: url(https://sp-bootstrap.global.ssl.fastly.net/8.0.0/fonts/circular-black.woff2)
+	font-weight: 700
+
+
+.md-display-1, .md-display-2, .md-display-3, .md-headline, .md-display-4
+	font-weight: 500
+	font-family: Circular, Robot, Sans-Serif !important
+		
+.md-display-4
+	font-weight: 700 !important
+
+queue
+	.tracks
+		padding: 18px 0px
+		
+		.track
+			.index
+				margin-right: 16px
+				color: white
+				font-weight: 500
+	
+	.people
+		position: absolute
+		width: 100%
+		transform: translateY(-50%)
+		z-index: 2
+
+		.person
+			margin: 0px 3px
+
+albums, artists
+	.container
+		perspective: 2000px
+	
+album
+	.container
+		position: relative
+		cursor: pointer
+		transition: ease-in-out transform 200ms
+		
+		&:focus
+			outline: 0
+			
+		&:hover
+			transform: translateZ(-20px) rotate3d(1, 0, 0, 3deg)
+		
+artist
+	.container
+		position: relative
+		cursor: pointer
+		width: 100px
+		margin: 0px 5px
+		transition: ease-in-out transform 200ms
+		
+		&:focus
+			outline: 0
+			
+		&:hover
+			transform: translateZ(-20px) rotate3d(1, 0, 0, 3deg)
+	
+	.name
+	    text-align: center
+	    margin-bottom: 5px
+	    line-height: 17px
+	    
+	.followers
+		margin-top: 0px
+		text-align: center
+
+.md-avatar
+	border-radius: 50%
+	object-fit: cover
+	
+	&.square
+		border-radius: 0px !important
+	
+	&.small
+		width: 25px
+		height: 25px
+		
+	&.large
+		width: 40px
+		height: 40px
+		
+	&.x-large
+		width: 80px
+		height: 80px
+		
+	&.ring
+		border: 5px solid #3a3a3a
+		
+md-input-container.no-error
+	.md-errors-spacer
+		display: none	
+
+// Final styles
+
 playbar
 	md-card
 		margin: 0
