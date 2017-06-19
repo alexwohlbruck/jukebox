@@ -10,6 +10,7 @@
   "author": "Alex Wohlbruck (alexwohlbruck@gmail.com)",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "body-parser": "^1.16.1",
     "cheerio": "^0.22.0",
     "combined-stream": "^1.0.5",

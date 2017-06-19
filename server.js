@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var expressGeoIP = require('express-geoip');
 
+global.Promise = require('bluebird');
+
 if (env === 'development') {
 	var morgan = require('morgan');
 	app.use(morgan('dev'));

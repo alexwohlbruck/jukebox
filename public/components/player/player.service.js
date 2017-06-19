@@ -9,10 +9,19 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	this.pinnedQueue = true;
 	
 	this.queue = {
-		nowPlaying: {
-			index: 0
-		}
-	};
+        source: {
+            id: null,
+            type: null,
+            tracks: [],
+            /* other spotify data */
+        },
+        nowPlaying: {
+            index: 0,
+            paused: true,
+            track: null,
+            progress: 0
+        }
+    };
 	
 	this.latency = 100;
 	this.maxLatency = 250;
@@ -37,56 +46,23 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
     });
 	
 	
-	//*
-	this.setQueue = function(newQueue) {
-		var promise;
-		this.queue = Object.assign(this.queue, newQueue);
-		
-		switch (newQueue.source.type) {
-			case 'album':
-				promise = $http.get('/api/albums/'+newQueue.source.id+'/tracks');
-				break;
-			case 'playlist':
-				promise = $http.get('/api/users/'+newQueue.source.owner.id+'/playlists/'+newQueue.source.id+'/tracks');
-				break;
-			case 'artist':
-				promise = $http.get('/api/artists/'+newQueue.source.id+'/top-tracks');
-				break;
-			default:
-				console.log('no case selected');
-		}
-		
-		promise.then(function(response) {
-			Player.queue = newQueue;
-			switch (newQueue.source.type) {
-				case 'playlist':
-					Player.queue.tracks = response.data.items.map(o => o.track);
-					break;
-				case 'album':
-					Player.queue.tracks = response.data.items;
-				case 'artist':
-					break;
-				default:
-					Player.queue.tracks = response.data.tracks;
-					break;
-			}
-			Player.playTrack(Player.queue.tracks[0]);
-		});
-	};
-	
-	Socket.on('queue:set', function(newQueue) {
-		Player.setQueue(newQueue);
+	Socket.on('queue:update', function(newQueue) {
+		Player.udpateQueue(newQueue);
 	});
 	
-	/*/
+	this.play = function(source) {
+		Socket.emit('queue:set', source);
+	};
 	
-	this.setQueue = function() {
-		
-	};/**/
+	Socket.on('queue:set', function(source) {
+		Player.queue.source = source;
+		Player.updateStreamUrl();
+		Player.updateVibrantSwatches();
+	});
 	
 	
 	this.plause = function() {
-		Socket.emit(Player.el.paused ? 'playback:play' : 'playback:pause');
+		Socket.emit('playback:plause');
 	};
 	
 	Socket.on('playback:play', function() {
@@ -151,7 +127,13 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 		});
 	};
 	
+	this.updateStreamUrl = function() {
+		var track = Player.queue.source.tracks.items[Player.queue.nowPlaying.index];
+		Player.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+track.artists[0].name+'&track='+track.name;
+	};
+	
 	Player.el.addEventListener('canplay', function() {
+		console.log('canplay');
 		Socket.emit('playback:canplay');
 	});
 	

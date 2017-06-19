@@ -4,9 +4,9 @@ module.exports = function(io) {
             source: {
                 id: null,
                 type: null,
-                /* other optional spotify data */
+                tracks: [],
+                /* other spotify data */
             },
-            tracks: [],
             nowPlaying: {
                 index: 0,
                 paused: true,
@@ -15,8 +15,12 @@ module.exports = function(io) {
             },
         },
         
+        setQueue(source) {
+            this.queue.source = source;
+            io.emit('queue:set', source);
+        },
         
-        setQueue(newQueue)  {
+        updateQueue(newQueue)  {
             this.queue = Object.assign(this.queue, newQueue);
         },
         
@@ -67,12 +71,6 @@ module.exports = function(io) {
         
 		client.on('connection:ping', () => client.emit('connection:pong'));
         
-        client.on('queue:set', newQueue => {
-            console.log('queue set');
-            Player.setQueue(newQueue);
-            io.emit('queue:set', Player.queue);
-        });
-        
         // TODO: Inefficient and verbose -- needs refactoring
         client.on('playback:canplay', data => {
             io.clients((error, clients) => {
@@ -98,6 +96,16 @@ module.exports = function(io) {
                     client.emit('playback:play', data);
                 }
             });
+        });
+        
+        client.on('queue:update', newQueue => {
+            console.log('queue update');
+            Player.updateQueue(newQueue);
+            io.emit('queue:update', Player.queue);
+        });
+        
+        client.on('queue:set', source => {
+            Player.setQueue(source);
         });
         
         client.on('playback:plause', () => Player.plause());

@@ -102,7 +102,7 @@
 		<!-- Your application bootstrap  -->
 		<script type="text/javascript">
 			/* global angular */
-			var app = angular.module('jukebox', ['ngMaterial', 'ui.router', 'btford.socket-io', 'ngVibrant']);
+			var app = angular.module('jukebox', ['ngMaterial', 'ngAnimate', 'ui.router', 'btford.socket-io', 'ngVibrant']);
 			
 			app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
 				var states = [
@@ -142,20 +142,10 @@
 				$scope.Player = Player;
 				$rootScope.$state = $state;
 				
-				$scope.setQueue = function(dataType, i, source) {
-					Socket.emit('queue:set', {
-						source: source,
-						nowPlaying: {
-							index: i,
-							progress: 0
-						}
-					});
-				};
-				
 				$scope.openLyrics = function(event) {
 					Socket.emit('lyrics:open', {event: event});
 					
-					var track = Player.queue.tracks[Player.queue.nowPlaying.index];
+					var track = Player.queue.source.tracks.items[Player.queue.nowPlaying.index];
 					$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
 						$mdDialog.show({
 							parent: angular.element(document.body),
@@ -171,15 +161,16 @@
 						});
 					});
 				};
-				
-				$scope.loadSuggestions = function(query) {
-					return $http.get('/api/tracks/search?q='+ query)
-						.then(function(response) {
-							return response.data.body.tracks.items;
-						});
-				};
 			}]);
 		</script>
+		
+		<script type="text/javascript" src="components/socket/socket.factory.js"></script>
+		
+		<script type="text/javascript" src="apis/spotify.service.js"></script>
+		
+		<script type="text/javascript" src="components/player/player.service.js"></script>
+		
+		<script type="text/javascript" src="views/search/search.controller.js"></script>
 		
 		<script type="text/javascript" src="components/player/playbar/playbar.directive.js"></script>
 		<script type="text/javascript" src="components/player/seekbar/seekbar.directive.js"></script>
@@ -191,12 +182,6 @@
 		<script type="text/javascript" src="components/lists/tracks/tracks.directive.js"></script>
 		<script type="text/javascript" src="components/album/album.directive.js"></script>
 		<script type="text/javascript" src="components/artist/artist.directive.js"></script>
-		
-		<script type="text/javascript" src="views/search/search.controller.js"></script>
-		
-		<script type="text/javascript" src="components/socket/socket.factory.js"></script>
-		
-		<script type="text/javascript" src="components/player/player.service.js"></script>
 		
 		<script type="text/javascript" src="filters/capitalize.filter.js"></script>
 		<script type="text/javascript" src="filters/seconds-time.filter.js"></script>

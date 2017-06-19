@@ -57,6 +57,23 @@ album
 			
 		&:hover
 			transform: translateZ(-20px) rotate3d(1, 0, 0, 3deg)
+			
+	.md-fab
+		position: absolute
+		right: 0
+		top: 95px
+		background: rgba(255, 255, 255, .8) !important
+		transition: cubic-bezier(0.34, 0, 0.09, 1) transform 300ms !important
+		transform: scale(1)
+		
+		&:hover
+			background: rgba(255, 255, 255, .8)
+			
+		&.ng-hide
+			transform: scale(0)
+			
+		md-icon
+			color: rgba(0, 0, 0, .6) !important
 		
 artist
 	.container

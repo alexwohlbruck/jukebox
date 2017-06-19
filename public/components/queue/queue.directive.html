@@ -29,7 +29,7 @@
 </div>
     
 <md-list flex class="tracks">
-    <md-list-item class="md-2-line track" ng-repeat="track in Player.queue.tracks" ng-click="alert('hi')">
+    <md-list-item class="md-2-line track" ng-repeat="track in Player.queue.source.tracks.items" ng-click="alert('hi')">
         <img ng-show="track.album.images[0].url" src="{{track.album.images[0].url}}" alt="" class="md-avatar square">
         
         <div layout="row">
