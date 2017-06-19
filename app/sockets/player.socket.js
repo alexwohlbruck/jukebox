@@ -30,17 +30,14 @@ module.exports = function(io) {
         },
         
         skip(direction) {
-            // ?TODO: Update data for 'this.queue.nowPlaying.track'
-            if (direction == 'next') {
-                if (this.queue.nowPlaying.index < this.queue.tracks.length - 1) {
-                    this.queue.nowPlaying.index++;
-                    io.emit('playback:skip.next');
-                }
-            } else if (direction == 'prev') {
-                if (this.queue.nowPlaying.index > 0) {
-                    this.queue.nowPlaying.index--;
-                    io.emit('playback:skip.prev');
-                }
+            if (!this.queue.source.tracks || !this.queue.source.tracks.items) return false;
+            
+            if (direction == 'next' && this.queue.nowPlaying.index < this.queue.source.tracks.items.length - 1) {
+                this.queue.nowPlaying.index++;
+                io.emit('playback:skip.next');
+            } else if (direction == 'prev' && this.queue.nowPlaying.index > 0) {
+                this.queue.nowPlaying.index--;
+                io.emit('playback:skip.prev');
             }
         },
         
@@ -66,8 +63,6 @@ module.exports = function(io) {
     io.on('connection', client => {
         
         var clientsThatCanPlay = 0, canPlayTimeout;
-        
-        client.emit('queue:set', Player.queue);
         
 		client.on('connection:ping', () => client.emit('connection:pong'));
         
@@ -99,7 +94,6 @@ module.exports = function(io) {
         });
         
         client.on('queue:update', newQueue => {
-            console.log('queue update');
             Player.updateQueue(newQueue);
             io.emit('queue:update', Player.queue);
         });

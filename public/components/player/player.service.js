@@ -48,6 +48,8 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	
 	Socket.on('queue:update', function(newQueue) {
 		Player.udpateQueue(newQueue);
+		Player.updateStreamUrl();
+		Player.updateVibrantSwatches();
 	});
 	
 	this.play = function(source) {
@@ -77,45 +79,20 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 		}, (Player.maxLatency - Player.latency));
 	});
 	
-	
-	/*this.playTrack = function(track) {
-		// Infinite recursion on multiclient playback -- fix this!
-		Socket.emit('track:play', {track: track});
-		
-		var artistName = track.artists[0].name,
-			trackName = track.name;
-		
-		Player.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
-	};
-	
-	Socket.on('track:play', function(data) {
-		Player.playTrack(data.track);
-	});
-	
-	
-	this.playTrackFromIndex = function(index) {
-		Socket.emit('track:play.index', {index: index});
-		
-		Player.queue.nowPlaying.index = index;
-		Player.playTrack(Player.queue.tracks[index]);
-	    Player.updateVibrantSwatches();
-	};
-	
-	Socket.on('track:play.index', function(data) {
-		Player.playTrackFromIndex(data.index);
-	});*/
-	
-	
 	this.skip = function(direction) {
 		Socket.emit('playback:skip.' + direction);
 	};
 	
 	Socket.on('playback:skip.next', function() {
 		Player.queue.nowPlaying.index++;
+		Player.updateStreamUrl();
+		Player.updateVibrantSwatches();
 	});
 	
 	Socket.on('playback:skip.prev', function() {
 		Player.queue.nowPlaying.index--;
+		Player.updateStreamUrl();
+		Player.updateVibrantSwatches();
 	});
 	
 	this.updateVibrantSwatches = function() {
@@ -138,6 +115,6 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
 	});
 	
 	Socket.on('playback:ended', function() {
-		Player.el.skipTrack();
+		Player.el.skip('next');
 	});
 }]);
