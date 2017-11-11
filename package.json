@@ -1,29 +1,62 @@
 {
-  "name": "Jukebox",
+  "name": "jukebox",
   "version": "0.0.1",
-  "description": "A music server that streams mp3 files based on YouTube videos and Spotify data",
   "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "directories": {
+    "lib": "src",
+    "test": "test/"
   },
-  "author": "",
-  "license": "ISC",
+  "engines": {
+    "node": ">= 6.0.0",
+    "yarn": ">= 0.18.0"
+  },
+  "scripts": {
+    "test": "npm run eslint && npm run mocha",
+    "eslint": "eslint src/. test/. --config .eslintrc.json",
+    "start": "node src/",
+    "build": "webpack && yarn run start",
+    "mocha": "mocha test/ --recursive --exit"
+  },
   "dependencies": {
-    "body-parser": "^1.16.1",
-    "cheerio": "^0.22.0",
-    "combined-stream": "^1.0.5",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.14.1",
-    "googleapis": "^16.1.0",
-    "method-override": "^2.3.7",
-    "request": "^2.81.0",
-    "request-promise": "^4.2.1",
-    "spotify-web-api-node": "^2.3.6",
-    "ytdl-core": "^0.14.1"
+    "body-parser": "^1.18.2",
+    "compression": "^1.7.1",
+    "cors": "^2.8.4",
+    "feathers": "^2.2.3",
+    "feathers-configuration": "^0.4.2",
+    "feathers-errors": "^2.9.2",
+    "feathers-hooks": "^2.1.2",
+    "feathers-hooks-common": "^3.10.0",
+    "feathers-rest": "^1.8.1",
+    "feathers-socketio": "^2.0.1",
+    "helmet": "^3.9.0",
+    "moment": "^2.19.1",
+    "serve-favicon": "^2.4.5",
+    "vue": "^2.5.2",
+    "vue-material": "^0.7.5",
+    "vue-router": "^3.0.1",
+    "vue-template-compiler": "^2.5.2",
+    "vuex": "^3.0.0",
+    "winston": "^2.4.0"
   },
   "devDependencies": {
-    "morgan": "^1.8.0",
-    "nodemon": "^1.11.0"
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-stage-2": "^6.24.1",
+    "css-loader": "^0.28.7",
+    "es2017": "^0.0.0",
+    "eslint": "^4.10.0",
+    "mocha": "^4.0.1",
+    "node-sass": "^4.5.3",
+    "pug": "^2.0.0-rc.4",
+    "pug-loader": "^2.3.0",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "sass-loader": "^6.0.6",
+    "style-loader": "^0.19.0",
+    "vue-loader": "^13.3.0",
+    "webpack": "^3.8.1",
+    "webpack-dev-middleware": "^1.12.0",
+    "webpack-hot-middleware": "^2.20.0",
+    "webpack-merge": "^4.1.1"
   }
 }
