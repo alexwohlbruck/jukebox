@@ -1,6 +1,11 @@
 <template lang="pug">
-	md-layout(md-row, md-gutter='true')
-		md-card.album(v-for='(album, index) in albums', :key='album.id', md-with-hover, @click.native='$router.push("album")')
+	div(style='display: flex; flex-direction: row;')
+		md-card.album(
+			v-for='(album, index) in albums.items',
+			:key='album.id',
+			md-with-hover,
+			@click.native='$router.push({name: "album", params: {id: album.id}})'
+		)
 			md-card-media
 				img(:src='album.images[1].url')
 
@@ -20,10 +25,7 @@
 	import { mapState } from 'vuex'
 
 	export default {
-		computed: {
-			...mapState('library', {
-				albums: state => state.albums
-			})
-		}
+		name: 'albums-list',
+		props: ['albums']
 	}
 </script>

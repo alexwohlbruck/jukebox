@@ -23,15 +23,15 @@
 
 			div
 				.md-body-2.subtitle Popular songs
-				tracks
+				tracks-list
 
 			div
 				.md-body-2.subtitle Albums
-				albums.albums
+				albums-list.albums
 
 			div
 				.md-body-2.subtitle Related artists
-				artists.artists
+				artists-list.artists
 </template>
 
 <style lang="scss" scoped>
@@ -66,15 +66,15 @@
 </style>
 
 <script>
-	import Tracks from '../widgets/Tracks'
-	import Albums from '../widgets/Albums'
-	import Artists from '../widgets/Artists'
+	import TracksList from '../widgets/TracksList'
+	import AlbumsList from '../widgets/AlbumsList'
+	import ArtistsList from '../widgets/ArtistsList'
 
 	export default {
 		components: {
-			Tracks,
-			Albums,
-			Artists
+			TracksList,
+			AlbumsList,
+			ArtistsList
 		}
 	}
 </script>

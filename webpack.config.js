@@ -10,7 +10,7 @@ const host = process.env.HOST || 'localhost';
 const port = process.env.PORT || 3030; 
 
 const baseConfig = {
-	entry: ['webpack-hot-middleware/client', './app/src/main.js'],
+	entry: ['webpack-hot-middleware/client', './app/main.js'],
 	output: {
 		path: path.join(__dirname, 'public'),
 		filename: 'bundle.js',
@@ -23,7 +23,7 @@ const baseConfig = {
 	module: {
 		rules: [
 			{
-				test: /\.css$/,
+				test: /\.(css|scss)$/,
 				use: [{loader: 'style-loader'}, {loader: 'css-loader'}, {loader: 'sass-loader'}]
 			},
 			{

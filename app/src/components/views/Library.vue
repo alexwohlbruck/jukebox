@@ -1,15 +1,15 @@
 <template lang="pug">
 	md-tabs.md-transparent
 		md-tab#songs(md-label='songs')
-			tracks
+			tracks-list
 
 		md-tab#albums(md-label='albums')
-			albums
+			albums-list
 </template>
 
 <script>
-	import Tracks from '../widgets/Tracks'
-	import Albums from '../widgets/Albums'
+	import TracksList from '../widgets/TracksList'
+	import AlbumsList from '../widgets/AlbumsList'
 
 	export default {
 		name: 'Library',
@@ -19,8 +19,8 @@
 			}
 		},
 		components: {
-			Tracks,
-			Albums
+			TracksList,
+			AlbumsList
 		}
 	}
 </script>
