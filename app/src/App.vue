@@ -42,17 +42,18 @@
 					span.md-list-item-text Playlists
 
 					//- md-list-expand
-					//- 	md-list
-					//- 		md-list-item.md-inset
-					//- 			md-icon wifi_tethering
-					//- 			span Release Radar
-					//- 		md-list-item.md-inset
-					//- 			md-icon new_releases
-					//- 			span Discover Weekly
-					//- 		md-list-item.md-inset(v-for='playlist in [":D", "Chill", "Hype", "Sappy", "Sailing", "Beach"]', :key='playlist')
-					//- 			span {{playlist}}
+						md-list
+							md-list-item.md-inset
+								md-icon wifi_tethering
+								span Release Radar
+							md-list-item.md-inset
+								md-icon new_releases
+								span Discover Weekly
+							md-list-item.md-inset(v-for='playlist in [":D", "Chill", "Hype", "Sappy", "Sailing", "Beach"]', :key='playlist')
+								span {{playlist}}
 
-		md-app-content
+		md-app-content.main-view
+			player
 			router-view
 				
 </template>
@@ -71,9 +72,17 @@
 	.nav {
 		width: 220px;
 	}
+
+	.main-view {
+	    padding: 0;
+	    padding-bottom: 75px;
+	    width: 100%;
+	}
 </style>
 
 <script>
+	import Player from './components/widgets/Player'
+
 	export default {
 		name: 'app',
 		data: () => ({
@@ -82,7 +91,7 @@
 		}),
 		filters: {
 			capitalize(string) {
-				return string//string.charAt(0).toUpperCase() + string.slice(1)
+				return string ? string.charAt(0).toUpperCase() + string.slice(1) : ''
 			}
 		},
 		methods: {
@@ -93,6 +102,9 @@
 				console.log('router')
 				this.$route.router.push({name: 'search', query: {q: this.searchQuery}})
 			}
+		},
+		components: {
+			Player
 		}
 	}
 </script>

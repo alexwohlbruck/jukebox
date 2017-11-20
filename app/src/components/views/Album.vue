@@ -1,5 +1,6 @@
 <template lang="pug">
-	md-layout(md-align='center')
+	//- md-layout(md-align='center')
+	div
 		md-card.header
 			md-layout(md-row, style='background-color: #9CE3FD')
 				div.cover
@@ -8,13 +9,13 @@
 				md-layout(md-column)
 					md-card-header.title.md-flex
 						md-card-header-text
-							.md-display-1 {{album.name}}
+							.md-display-1 {{album.name}} {{hover}}
 							.md-subheading
 								router-link(to='artist') {{album.artists[0].name}}
 								span &nbsp;&bull;&nbsp;
 								span {{album.tracks.items.length}} {{album.tracks.items.length == 1 ? 'song' : 'songs'}}
 
-						md-menu(md-size='4', md-direction='bottom left')
+						md-menu(md-size='4')
 							md-button.md-icon-button(md-menu-trigger)
 								md-icon more_vert
 
@@ -44,7 +45,7 @@
 			//- 		label Filter
 			//- 		md-input(v-model='filterQuery')
 			
-			tracks-list(tracks='album.tracks.items')
+			tracks-list(:tracks='album.tracks', :options='{hide: ["album", "artist"]}')
 
 </template>
 
@@ -88,10 +89,9 @@
 			// document.body.style.backgroundImage = `url('${this.album.images[0].url}')`
 			// document.body.style.backgroundSize = 'cover'
 			this.getAlbum(this.$route.params.id)
-			console.log(this.tracks.items)
 		},
 		watch: {
-			'$route': 'getAlbum'
+			'$route.params.id': 'getAlbum'
 		},
 		computed: {
 			...mapGetters({

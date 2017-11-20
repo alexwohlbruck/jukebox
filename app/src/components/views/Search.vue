@@ -18,7 +18,7 @@
 			this.search(this.$route.query.q)
 		},
 		watch: {
-			$route: 'search'
+			'$route.query.q': 'search'
 		},
 		computed: {
 			...mapGetters([
