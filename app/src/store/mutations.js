@@ -1,7 +1,10 @@
 export default {
 	setQueue (state, data) {
-		const {nowPlaying, source, tracks} = data
-		state.player.queue = {nowPlaying, source, tracks}
+		state.player = data
+	},
+	plause (state, data) {
+		console.log('mut', data.paused)
+		state.player.paused = data.paused
 	},
 	search (state, data) {
 		state.searchResults = data.body

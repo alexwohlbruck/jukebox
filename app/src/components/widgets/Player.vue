@@ -1,11 +1,12 @@
 <template lang="pug">
 	md-card.player.md-primary.md-elevation-4(:class='{hidden: !queueExists}')
-		audio(:src='streamSource' type='audio/mpeg', v-if='queueExists', autoplay, controls)
+		audio(:src='streamSource', type='audio/mpeg', ref='audio', v-if='queueExists', autoplay, controls)
 
 		md-button.md-icon-button.md-raised(@click='plause')
-			md-icon {{paused ? 'play_arrow' : 'pause'}}
+			md-icon {{player.paused ? 'play_arrow' : 'pause'}}
 
-		p {{player.queue.nowPlaying.track.name}}
+		div
+			span {{player.nowPlaying.track.name}}
 </template>
 
 <style lang="scss" scoped>
@@ -28,32 +29,34 @@
 
 <script>
 	import queryString from 'query-string'
-	import { mapGetters } from 'vuex'
+	import { mapGetters, mapActions } from 'vuex'
 
 	export default {
 		name: 'player',
-		data() {
-			return {
-				paused: true
-			}
-		},
 		computed: {
 			streamSource() {
-				const artist = this.player.queue.nowPlaying.track.artists[0].name
-				const track = this.player.queue.nowPlaying.track.name
-				console.log('/stream?' + queryString.stringify({artist, track}))
+				const artist = this.player.nowPlaying.track.artists[0].name
+				const track = this.player.nowPlaying.track.name
 				return '/stream?' + queryString.stringify({artist, track})
 			},
 			queueExists() {
-				return !!this.player.queue.nowPlaying.track
+				return !!this.player.nowPlaying.track
 			},
 			...mapGetters([
 				'player'
 			])
 		},
 		methods: {
-			plause() {
-				this.paused = !this.paused
+			...mapActions([
+				'plause'
+			])
+		},
+		watch: {
+			'player.paused'() {
+				const updatedToPaused = this.player.paused,
+					  audio = this.$refs.audio
+
+				updatedToPaused ? audio.pause() : audio.play()
 			}
 		}
 	}

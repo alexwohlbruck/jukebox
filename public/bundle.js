@@ -61,7 +61,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "a30f48c897c65f94cc2a"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "e4f7c06d4e46fabb03b0"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -80061,31 +80061,32 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 //
 //
 //
+//
+//
+//
 
 
 
 
 /* harmony default export */ __webpack_exports__["a"] = ({
 	name: 'player',
-	data() {
-		return {
-			paused: true
-		};
-	},
 	computed: _extends({
 		streamSource() {
-			const artist = this.player.queue.nowPlaying.track.artists[0].name;
-			const track = this.player.queue.nowPlaying.track.name;
-			console.log('/stream?' + __WEBPACK_IMPORTED_MODULE_0_query_string___default.a.stringify({ artist, track }));
+			const artist = this.player.nowPlaying.track.artists[0].name;
+			const track = this.player.nowPlaying.track.name;
 			return '/stream?' + __WEBPACK_IMPORTED_MODULE_0_query_string___default.a.stringify({ artist, track });
 		},
 		queueExists() {
-			return true;
+			return !!this.player.nowPlaying.track;
 		}
 	}, Object(__WEBPACK_IMPORTED_MODULE_1_vuex__["c" /* mapGetters */])(['player'])),
-	methods: {
-		plause() {
-			this.paused = !this.paused;
+	methods: _extends({}, Object(__WEBPACK_IMPORTED_MODULE_1_vuex__["b" /* mapActions */])(['plause'])),
+	watch: {
+		'player.paused'() {
+			const updatedToPaused = this.player.paused,
+			      audio = this.$refs.audio;
+
+			updatedToPaused ? audio.pause() : audio.play();
 		}
 	}
 });
@@ -80536,6 +80537,7 @@ var render = function() {
     [
       _vm.queueExists
         ? _c("audio", {
+            ref: "audio",
             attrs: {
               src: _vm.streamSource,
               type: "audio/mpeg",
@@ -80547,9 +80549,16 @@ var render = function() {
       _c(
         "md-button",
         { staticClass: "md-icon-button md-raised", on: { click: _vm.plause } },
-        [_c("md-icon", [_vm._v(_vm._s(_vm.paused ? "play_arrow" : "pause"))])],
+        [
+          _c("md-icon", [
+            _vm._v(_vm._s(_vm.player.paused ? "play_arrow" : "pause"))
+          ])
+        ],
         1
-      )
+      ),
+      _c("div", [
+        _c("span", [_vm._v(_vm._s(_vm.player.nowPlaying.track.name))])
+      ])
     ],
     1
   )
@@ -91822,18 +91831,21 @@ Backoff.prototype.setJitter = function(jitter){
 /* harmony default export */ __webpack_exports__["a"] = ({
 	player: {
 		queue: {
-			nowPlaying: {
-				index: 0,
-				paused: true,
-				progress: 0,
-				track: null
-			},
 			tracks: [],
 			source: {
 				id: null,
 				type: null
 			}
-		}
+		},
+		nowPlaying: {
+			index: 0,
+			track: {
+				artists: [],
+				album: {}
+			}
+		},
+		paused: true,
+		progress: 0
 	},
 	searchResults: {
 		artists: [],
@@ -91851,8 +91863,11 @@ Backoff.prototype.setJitter = function(jitter){
 "use strict";
 /* harmony default export */ __webpack_exports__["a"] = ({
 	setQueue(state, data) {
-		const { nowPlaying, source, tracks } = data;
-		state.player.queue = { nowPlaying, source, tracks };
+		state.player = data;
+	},
+	plause(state, data) {
+		console.log('mut', data.paused);
+		state.player.paused = data.paused;
 	},
 	search(state, data) {
 		state.searchResults = data.body;
@@ -91873,26 +91888,37 @@ const search = __WEBPACK_IMPORTED_MODULE_0__feathers_client__["a" /* default */]
 const album = __WEBPACK_IMPORTED_MODULE_0__feathers_client__["a" /* default */].service('album');
 const player = __WEBPACK_IMPORTED_MODULE_0__feathers_client__["a" /* default */].service('player');
 
+const playerID = '5a1371844d4eb07eb9cf002e';
+
 /* harmony default export */ __webpack_exports__["a"] = ({
 	setQueue({ commit, state }, { tracks, index, source }) {
-
 		if (source) {
 			const { id, type } = source;
 		}
 		const currentTrack = tracks[index];
 		tracks = tracks.map(t => t.id);
 
-		player.patch('5a12333efda702338969f7af', {
+		player.patch(playerID, {
+			queue: {
+				tracks: tracks,
+				source: source ? { id, type } : null
+			},
 			nowPlaying: {
 				index,
-				paused: false,
-				progress: 0,
 				track: currentTrack
 			},
-			tracks: tracks,
-			source: source ? { id, type } : null
+			paused: false,
+			progress: 0
 		}).then(data => {
 			commit('setQueue', data);
+		});
+	},
+	plause({ commit, state }) {
+		player.patch(playerID, {
+			paused: !state.player.paused
+		}).then(data => {
+			console.log('action', data);
+			commit('plause', data);
 		});
 	},
 
