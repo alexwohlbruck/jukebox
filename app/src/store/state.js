@@ -2,19 +2,18 @@ export default {
 	player: {
 		queue: {
 			tracks: [],
-			source: {
+			context: {
 				id: null,
 				type: null
-			}
+			},
+			index: 0
 		},
 		nowPlaying: {
-			index: 0,
-			track: {
-				artists: [],
-				album: {}
-			}
+			// Track
+			artists: [],
+			album: {}
 		},
-		paused: true,
+		playing: true,
 		progress: 0
 	},
 	searchResults: {

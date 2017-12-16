@@ -1,51 +1,51 @@
 <template lang="pug">
-	//- md-layout(md-align='center')
-	div
-		md-card.header
-			md-layout(md-row, style='background-color: #9CE3FD')
-				div.cover
-					img(:src='album.images[0].url')
+	md-card.header
+		md-card-header
+			md-card-media.cover
+				img(:src='album.images[0].url' alt='album.name')
 
-				md-layout(md-column)
-					md-card-header.title.md-flex
-						md-card-header-text
-							.md-display-1 {{album.name}} {{hover}}
-							.md-subheading
-								router-link(to='artist') {{album.artists[0].name}}
-								span &nbsp;&bull;&nbsp;
-								span {{album.tracks.items.length}} {{album.tracks.items.length == 1 ? 'song' : 'songs'}}
+			md-card-header-text
+				.md-display-1 {{album.name}} {{hover}}
+				.md-subheading
+					router-link(to='artist') {{album.artists[0].name}}
+					span &nbsp;&bull;&nbsp;
+					span {{album.tracks.items.length}} {{album.tracks.items.length == 1 ? 'song' : 'songs'}}
 
-						md-menu(md-size='4')
-							md-button.md-icon-button(md-menu-trigger)
-								md-icon more_vert
+				.info
+					.md-subheading {{album.release_date | formatDate}}
 
-							md-menu-content
-								md-menu-item
-									span Add to queue
-								md-menu-item
-									span Start radio
-								md-menu-item
-									span Go to Artist
-								md-divider
-								md-menu-item
-									span Add to library
-								md-menu-item
-									span Add to playlist
-								md-menu-item
-									span Share
+			md-menu(md-size='4')
+				md-button.md-icon-button(md-menu-trigger)
+					md-icon more_vert
 
-					md-button.shuffle.md-fab.md-clean
-						md-icon shuffle
+				md-menu-content
+					md-menu-item
+						span Add to queue
+					md-menu-item
+						span Start radio
+					md-menu-item
+						span Go to Artist
+					md-divider
+					md-menu-item
+						span Add to library
+					md-menu-item
+						span Add to playlist
+					md-menu-item
+						span Share
 
-					.info
-						.md-subheading {{album.release_date | formatDate}}
+			//- md-button.shuffle.md-fab.md-clean
+				md-icon shuffle
 
-			//- form(@submit.stop.prevent='submit')
-			//- 	md-input-container
-			//- 		label Filter
-			//- 		md-input(v-model='filterQuery')
-			
-			tracks-list(:tracks='album.tracks', :options='{hide: ["album", "artist"]}')
+		//- form(@submit.stop.prevent='submit')
+			md-input-container
+				label Filter
+				md-input(v-model='filterQuery')
+		
+		tracks-list(
+			:tracks='album.tracks',
+			:context='album',
+			:options='{hide: ["album", "artist"]}'
+		)
 
 </template>
 
@@ -53,11 +53,16 @@
 	body {
 		background-color: red !important;
 	}
+
 	.header {
 		min-width: 80%;
 
+		$coverSize: 250px;
+	
 		.cover {
-			width: 300px;
+			width: $coverSize;
+			height: $coverSize;
+			flex: 0 0 $coverSize;
 		}
 
 		.title {

@@ -1,9 +1,12 @@
 <template lang="pug">
 	div
-		.md-headline Search for
-			b &nbsp;{{this.$route.query.q}}
+		div(style='padding: 20px')
+			.md-headline Search for
+				b &nbsp;{{this.$route.query.q}}
+			br
 
-		albums-list(:albums='searchResults.albums')
+			albums-list(:albums='searchResults.albums')
+
 		tracks-list(:tracks='searchResults.tracks')
 </template>
 
@@ -27,7 +30,8 @@
 		},
 		methods: {
 			...mapActions([
-				'search'
+				'search',
+				'test'
 			])
 		},
 		components: {

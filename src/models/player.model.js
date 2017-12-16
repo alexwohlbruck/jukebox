@@ -8,21 +8,18 @@ module.exports = function (app) {
 	const player = new Schema({
 		// owner: {type: Schema.Types.ObjectId, ref: 'User'},
 		queue: {
-			tracks: [{type: String}], // Array of track IDs
-			source: {
+			tracks: [{type: Schema.Types.Mixed}], // Array of track IDs
+			context: {
 				id: {type: String, default: null}, // Source ID
 				type: {
 					type: String,
 					enum: [null, 'album', 'playlist', 'artist'],
 					default: null
 				}
-			}
+			},
+			index: {type: Number, default: 0}
 		},
-		nowPlaying: {
-			index: {type: Number, default: 0},
-			track: {type: Schema.Types.Mixed, default: null}
-		},
-		paused: {type: Boolean, default: true},
+		playing: {type: Boolean, default: false},
 		progress: {type: Number, default: 0},
 	}, {
 		timestamps: true

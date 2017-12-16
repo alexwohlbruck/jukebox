@@ -1,12 +1,18 @@
 <template lang="pug">
+div
 	md-card.player.md-primary.md-elevation-4(:class='{hidden: !queueExists}')
-		audio(:src='streamSource', type='audio/mpeg', ref='audio', v-if='queueExists', autoplay, controls)
+		audio(
+			:src='streamSource',
+			type='audio/mpeg',
+			ref='audio',
+			autoplay, controls
+		)
 
 		md-button.md-icon-button.md-raised(@click='plause')
-			md-icon {{player.paused ? 'play_arrow' : 'pause'}}
+			md-icon {{player.playing ? 'pause' : 'play_arrow'}}
 
 		div
-			span {{player.nowPlaying.track.name}}
+			span Name: {{player.nowPlaying.name}}
 </template>
 
 <style lang="scss" scoped>
@@ -22,7 +28,7 @@
 	    height: 75px;
 
 	    &.hidden {
-	    	transform: translateY(100%);
+	    	// transform: translateY(100%);
 	    }
 	}
 </style>
@@ -35,12 +41,15 @@
 		name: 'player',
 		computed: {
 			streamSource() {
-				const artist = this.player.nowPlaying.track.artists[0].name
-				const track = this.player.nowPlaying.track.name
+				if (!this.player.nowPlaying) return
+
+				const artist = this.player.nowPlaying.artists[0].name
+				const track = this.player.nowPlaying.name
+
 				return '/stream?' + queryString.stringify({artist, track})
 			},
 			queueExists() {
-				return !!this.player.nowPlaying.track
+				return !!this.player.nowPlaying
 			},
 			...mapGetters([
 				'player'
@@ -52,11 +61,12 @@
 			])
 		},
 		watch: {
-			'player.paused'() {
-				const updatedToPaused = this.player.paused,
+			'player.playing'() {
+				console.log('test')
+				const updatedToPlaying = this.player.playing,
 					  audio = this.$refs.audio
 
-				updatedToPaused ? audio.pause() : audio.play()
+				!updatedToPlaying ? audio.pause() : audio.play()
 			}
 		}
 	}

@@ -1,44 +1,37 @@
 import client from '../../feathers-client'
 const search = client.service('search')
 const album = client.service('album')
-const player = client.service('player')
 
-const playerID = '5a1371844d4eb07eb9cf002e'
+const playerId = '5a28690c879535359101b2df'
+
+const player = ({id, action, data}) => {
+	return client.service('player/' + action).patch(id, data || {})
+}
 
 export default {
-	setQueue ({commit, state}, {tracks, index, source}) {
-		if (source) {
-			const {id, type} = source
-		}
-		const currentTrack = tracks[index]
-		tracks = tracks.map(t => t.id)
-
-		player.patch(playerID, {
-			queue: {
-				tracks: tracks,
-				source: source ? {id, type} : null
-			},
-			nowPlaying: {
-				index,
-				track: currentTrack
-			},
-			paused: false,
-			progress: 0,
-		})
-		.then(data => {
-			commit('setQueue', data)
+	setQueue ({commit, state}, {tracks, startIndex, context}) {
+		console.log('test')
+		player({id: playerId, action: 'setQueue', data: {
+			tracks,
+			startIndex,
+			context
+		}}).then(data => {
+			// Data is not returned to app
+			// Should happen over socket.io broadcast to all clients
+			// or client should request data using api
+			console.log(data) // undefined
+			console.log({tracks, startIndex, context})
+			commit('setQueue', {tracks, startIndex, context})
 		})
 	},
 	plause ({commit, state}) {
-		player.patch(playerID, {
-			paused: !state.player.paused
-		})
+		player({id: playerId, action: 'plause'/*, data: {
+			playing: !state.player.playing
+		}*/})
 		.then(data => {
-			console.log('action', data)
 			commit('plause', data)
 		})
 	},
-
 	search ({commit, state}, query) {
 		search.find({query: {q: query}}).then(data => {
 			commit('search', data)

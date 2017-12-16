@@ -18,7 +18,7 @@ div
 		md-table-row(
 			v-for='(track, index) in tracks.items',
 			:key='index',
-			@click.native='setQueue({tracks: tracks.items, index, source})'
+			@click.native='setQueue({tracks: tracks.items, startIndex: index, context})'
 		)
 			md-table-cell {{index + 1}}
 			md-table-cell
@@ -48,7 +48,7 @@ div
 						md-menu-item Share	
 </template>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 	.stretch {
 		width: 100%;
 	}
@@ -60,7 +60,7 @@ div
 
 	export default {
 		name: 'tracks-list',
-		props: ['tracks', 'source', 'options'],
+		props: ['tracks', 'context', 'options'],
 		data() {
 			return {
 				hover: false
