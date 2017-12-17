@@ -6,5 +6,29 @@
     "default": 10,
     "max": 50
   },
-  "mongodb": "mongodb://localhost:27017/jukebox"
+  "mongodb": "mongodb://localhost:27017/jukebox",
+  "authentication": {
+    "secret": "b04a1d71d4375d2acebffa7bd8d7ea5a863aae5d698a3f3b6f06eccbf70423fe6d64e33bbc3779512a6b482cf5f3f677c23040a24c29a5682095e929f3bd00c11f9e486f338bd038e23331c6f27aa5d1bff125ca6ebbb5ffd1d37ad11f0945542bb1a21a1a374c4224b580622fa02fc74710cdea33edf909a75222c1e05b3ae87d5b8f6a3d21428c289f958e715c1f0a8ef160c1817d90e42b8d0244bb75be0957cd6b1bcfa0a83c8e097481c00fa1161852d70a5a2a0667f3290f2f5f56aa2e99d72eb34c99690e21222eded4b75eb2dd44d79c60b58eec69d54021ff322c1763217a2534fd6dfee80e3f87ef130607017b20adb2de4a16bd781f4751c40f9e",
+    "strategies": [
+      "jwt",
+      "local"
+    ],
+    "path": "/authentication",
+    "service": "users",
+    "jwt": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://yourdomain.com",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "usernameField": "email",
+      "passwordField": "password"
+    }
+  }
 }

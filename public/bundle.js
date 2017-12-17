@@ -61,7 +61,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "4c5173d210174c5f8dc8"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "57fce347e6c604426e46"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -77357,12 +77357,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 
 
@@ -77385,9 +77379,11 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 	methods: _extends({}, Object(__WEBPACK_IMPORTED_MODULE_1_vuex__["b" /* mapActions */])(['plause'])),
 	watch: {
 		'player.playing'() {
-			/*const updatedToPlaying = this.player.playing,
-   	  audio = this.$refs.audio
-   	updatedToPlaying ? audio.pause() : audio.play()*/
+			console.log('test');
+			const updatedToPlaying = this.player.playing,
+			      audio = this.$refs.audio;
+
+			!updatedToPlaying ? audio.pause() : audio.play();
 		}
 	}
 });
@@ -77832,13 +77828,37 @@ var render = function() {
   return _c(
     "div",
     [
-      _c("pre", [_vm._v(_vm._s(_vm.player.playing))]),
       _c(
-        "md-button",
-        { staticClass: "md-icon-button md-raised", on: { click: _vm.plause } },
+        "md-card",
+        {
+          staticClass: "player md-primary md-elevation-4",
+          class: { hidden: !_vm.queueExists }
+        },
         [
-          _c("md-icon", [
-            _vm._v(_vm._s(_vm.player.playing ? "pause" : "play_arrow"))
+          _c("audio", {
+            ref: "audio",
+            attrs: {
+              src: _vm.streamSource,
+              type: "audio/mpeg",
+              autoplay: "autoplay",
+              controls: "controls"
+            }
+          }),
+          _c(
+            "md-button",
+            {
+              staticClass: "md-icon-button md-raised",
+              on: { click: _vm.plause }
+            },
+            [
+              _c("md-icon", [
+                _vm._v(_vm._s(_vm.player.playing ? "pause" : "play_arrow"))
+              ])
+            ],
+            1
+          ),
+          _c("div", [
+            _c("span", [_vm._v("Name: " + _vm._s(_vm.player.nowPlaying.name))])
           ])
         ],
         1
@@ -89142,6 +89162,7 @@ Backoff.prototype.setJitter = function(jitter){
 	setQueue(state, queue) {
 		state.player.queue = queue;
 		state.player.nowPlaying = queue.tracks[queue.startIndex];
+		state.player.playing = true;
 	},
 	plause(state, data) {
 		console.log(data);
