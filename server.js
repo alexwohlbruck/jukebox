@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 
+require('dotenv').config()
+
 if (env === 'development') {
 	var morgan = require('morgan');
 	app.use(morgan('dev'));
