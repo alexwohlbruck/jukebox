@@ -1,6 +1,6 @@
 {
   "name": "Jukebox",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A music server that streams mp3 files based on YouTube videos and Spotify data",
   "main": "index.js",
   "scripts": {
@@ -12,10 +12,11 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.16.1",
-    "cheerio": "^0.22.0",
+    "cheerio": "^1.0.0-rc.2",
     "combined-stream": "^1.0.5",
     "cookie-parser": "^1.4.3",
     "country-data": "0.0.31",
+    "dotenv": "^10.0.0",
     "express": "^4.14.1",
     "express-geoip": "^2.2.0",
     "googleapis": "^16.1.0",
@@ -24,7 +25,7 @@
     "request-promise": "^4.2.1",
     "socket.io": "^2.0.1",
     "spotify-web-api-node": "^2.3.6",
-    "ytdl-core": "^0.8.1"
+    "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
     "grunt": "^1.0.1",

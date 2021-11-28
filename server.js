@@ -1,3 +1,4 @@
+require('dotenv').config();
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -10,6 +11,8 @@ var methodOverride = require('method-override');
 var expressGeoIP = require('express-geoip');
 
 global.Promise = require('bluebird');
+
+require('dotenv').config()
 
 if (env === 'development') {
 	var morgan = require('morgan');
