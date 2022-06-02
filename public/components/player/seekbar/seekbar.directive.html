@@ -1,0 +1,27 @@
+<div
+	ng-repeat="buffer in audio.buffers"
+	class="buffer"
+	style="width: {{buffer.length}}%; left: {{buffer.offset}}%;">
+</div>
+
+<div layout="row"
+	 layout-align="space-between stretch"
+	 class="container"
+	 style="height: {{height || 23}}px">
+
+	<span
+		class="time"
+		layout="row"
+		layout-align="center center">
+		{{audio.currentTime | secondsToTimeString}}
+	</span>
+
+	<input ng-model="audio.currentTime" type="range" min="0" max="{{audio.duration}}" step=".5"/>
+
+	<span
+		class="time"
+		layout="row"
+		layout-align="center center">
+		{{audio.duration | secondsToTimeString}}
+	</span>
+</div>

@@ -1,0 +1,57 @@
+<md-card
+	class="player md-whiteframe-6dp"
+	flex="100"
+	layout="row"
+	md-theme="{{Player.queue.nowPlaying.theme}}" md-theme-watch
+	ng-style="{'background-color': Player.queue.nowPlaying.swatches.Vibrant.getHex() || '#222'}">
+
+	<img
+		class="cover"
+		ng-src="{{Player.queue.tracks.items[Player.queue.nowPlaying.index].album.images[0].url || Player.queue.source.images[1].url || Player.queue.source.images[0].url}}"
+		vibrant ng-model="Player.queue.nowPlaying.swatches"
+		crossOrigin="anonymous"/>
+	
+	<div layout="column" flex>
+		<seekbar audio="Player.el"></seekbar>
+		
+		<div class="controls" layout="row" layout-align="space-between center" flex>
+			<div class="left md-padding">
+				<p class="title md-body-2">{{Player.queue.source.tracks.items[Player.queue.nowPlaying.index].name}}</p>
+				
+				<p class="detail md-caption">
+					<a ui-sref="artist({artistID: nowPlaying.track.artists[0].id})">{{Player.queue.source.tracks.items[0].artists[0].name}}</a>
+					-
+					<a ui-sref="album({albumID: nowPlaying.track.album.id})">{{Player.queue.source.name}}</a>
+				</p>
+			</div>
+			
+			<div class="center">
+				<md-button ng-disabled="true" class="md-icon-button" aria-label="Loop song">
+					<md-icon class="material-icons">loop</md-icon>
+				</md-button>
+				
+				<md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skip('prev')">
+					<md-icon class="material-icons">skip_previous</md-icon>
+				</md-button>
+				
+				<md-button class="md-icon-button" aria-label="Play/Pause" ng-click="Player.plause()">
+					<md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
+				</md-button>
+				
+				<md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skip('next')">
+					<md-icon class="material-icons">skip_next</md-icon>
+				</md-button>
+				
+				<md-button ng-disabled="true" class="md-icon-button" aria-label="Shuffle">
+					<md-icon class="material-icons">shuffle</md-icon>
+				</md-button>
+			</div>
+			
+			<div class="right">
+				<md-button class="md-icon-button" aria-label="Open Lyrics" ng-click="openLyrics($event)">
+					<md-icon class="material-icons">music_note</md-icon>
+				</md-button>
+			</div>
+		</div>
+	</div>
+</md-card>

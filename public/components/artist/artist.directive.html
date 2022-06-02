@@ -1,0 +1,11 @@
+<div
+    class="container"
+    ng-click="$state.go('artist', {artist: data.id})"
+    layout="column" layout-align="start center"
+    md-ink-ripple="#aaa">
+    
+    <img ng-src="{{data.images[2].url || data.images[1].url || '/res/img/empty/artist.svg'}}" class="md-avatar x-large ring" md-whiteframe="4dp">
+    
+    <p class="md-body-2 name">{{data.name}}</p>
+    <p class="md-caption followers">{{data.followers.total}} {{data.followers.total == 1 ? 'follower' : 'followers'}}</p>
+</div>

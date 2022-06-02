@@ -1,0 +1,32 @@
+<md-card
+    class="container"
+    ng-click="$state.go('album', {album: data.id})"
+    style="width: 150px;"
+    ng-style="{'background-color': data.swatches.Vibrant.getHex() || 'rgb(66,66,66)'}"
+    md-whiteframe="4dp"
+    md-ink-ripple="#000"
+    ng-mouseover="hover = true" ng-mouseleave="hover = false">
+    
+    <img
+        ng-src="{{data.images[1].url}}"
+        class="md-card-image"
+        alt="{{data.name}}"
+        vibrant ng-model="data.swatches"
+        crossorigin="anonymous">
+        
+    <md-button
+        class="md-fab md-mini"
+        ng-mousedown="$event.stopPropagation()"
+        md-ink-ripple="#777"
+        ng-click="plause()"
+        ng-show="hover || Player.queue.source.id == data.id">
+        
+        <md-icon class="material-icons">
+            {{Player.queue.source.id == data.id && !Player.el.paused ? 'pause' : 'play_arrow'}}
+        </md-icon>
+    </md-button>
+        
+    <md-card-content>
+        <p ng-style="{'color': data.swatches.Vibrant.getBodyTextColor()}">{{data.name}}</p>
+    </md-card-content>
+</md-card>

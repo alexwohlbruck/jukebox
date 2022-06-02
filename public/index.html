@@ -1,280 +1,191 @@
-<html lang="en" >
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-	<style>
-		.track {
-			margin: 5px;
-		}
-		.track-desc {
-			padding-left: 10px;
-			padding-top: 12px;
-		}
-		.track-desc p {
-			margin: 0; padding: 0;
-		}
-		
-		.playerBar {
-			width: 100%;
-		}
-		.playerBar > md-card {
-			margin-bottom: 0;
-		}
-		
-		.autocomplete-custom-template .track, .autocomplete-custom-template .artist {
-			padding: 0;
-			margin: 0;
-		}
-		
-		.margin-0 {
-			margin: 0 !important;
-		}
-		
-		.padding-sides {
-			padding: 0px 16px;
-		}
-		
-		.md-avatar.no-mask {
-			border-radius: 0 !important;
-		}
-		
-		.md-avatar {
-			width: 40px;
-			height: 40px;
-			border-radius: 50%;
-		}
-		.md-avatar.large {
-			width: 60px;
-			height: 60px;
-		}
-		
-		.scroll-container {
-			overflow-y: scroll;
-		}
-		
-	</style>
-</head>
-<body ng-app="jukebox" ng-controller="MainCtrl" ng-cloak layout="column" layout-align="space-between stretch" style="height: 100vh;">
-
-	<md-toolbar class="md-hue-2" md-whiteframe="3dp">
-		<form ng-submit="search(searchText)" class="margin-0">
-			<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
-				<h2 flex="10" md-truncate>Jukebox</h2>
-				
-				<md-autocomplete
-					flex="40"
-					ng-disabled="isDisabled"
-					md-items="track in loadSuggestions(searchText)"
-					md-item-text="track.name"
-					md-no-cache="noCache"
-					md-selected-item="selectedItem"
-					md-search-text="searchText"
-					md-selected-item-change="playTrack(track)"
-					md-min-length="0"
-					md-delay="100"
-					md-menu-class="search-suggestion"
-					placeholder="Search a song, artist, or album">
-					
-					<md-item-template ng-click="playTrack(track)">
-						<span class="track" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.name}}</span>
-						<br/>
-						<span class="artist" md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{track.artists[0].name}}</span>
-					</md-item-template>
-					
-					<md-not-found>
-						Sorry, we couldn't find <strong>{{searchText}}</strong>
-					</md-not-found>
-				</md-autocomplete>
-				
-				<span flex="10"></span>
-			</div>
-		</form>
-    </md-toolbar>
+<html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
+	<head>
+		<title ng-bind="queue.nowPlaying.streamUrl ? (queue.tracks[queue.nowPlaying.index].name + ' - ' + queue.tracks[queue.nowPlaying.index].artists[0].name) : 'Jukebox Redux'">
+			Jukebox Redux
+		</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	</head>
 	
-	<div layout="row" flex ng-if="searchResults">
-		<div layout="row" layout-align="space-around stretch" flex>
-			<div flex ng-repeat="section in ['albums', 'playlists']"  class="scroll-container">
-				<md-list flex>
-					<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
+	<body ng-cloak layout="row">
+		
+		<audio
+			id="song"
+			ng-src="{{Player.queue.nowPlaying.streamUrl}}">
+		</audio>
+		
+		<section layout="column" flex>
+
+			<md-toolbar class="md-hue-2" md-whiteframe="2dp">
+				<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
+					<h2 flex="10" md-truncate>Jukebox</h2>
 					
-					<md-list-item class="md-2-line" ng-repeat="item in searchResults[section]" ng-click="createNewQueue(section, $index, item)">
-						<img ng-src="{{item.images[0].url}}" class="md-avatar no-mask" alt="{{todos[0].who}}"/>
+					<p>Latency: {{Player.latency}}</p>
+					
+					<div layout="row" layout-align="center center">
+						<form ng-submit="$state.go('search', {q: searchQuery})" style="margin: 0;">
+							<md-input-container ng-show="showSearch" class="no-error">
+								<label>Search</label>
+								<input ng-model="searchQuery">
+							</md-input-container>
+						</form>
 						
-						<div class="md-list-item-text">
-							<h3>{{item.name}}</h3>
-							<p>{{item.artists[0].name || item.owner.id}}</p>
-						</div>
-					</md-list-item>
-				</md-list>
-			</div>
-		</div>
-		
-		<div flex="30" ng-show="queue.source" class="padding-sides scroll-container" md-whiteframe="4dp" style="z-index: 1;">
-			<p class="md-body-2">Now Playing</p>
-			
-			<div layout="row">
-				<img ng-src="{{queue.source.images[0].url}}" class="md-avatar large no-mask"/>
-				
-				<div layout="column" style="margin: 5px 15px;">
-					<p class="md-title margin-0">{{queue.source.name}}</p>
-					<p class="md-subhead margin-0">{{queue.source.artists[0].name || queue.source.owner.id}}</p>
-				</div>
-			</div>
-			
-			<md-list>
-				<md-list-item class="md-2-line" ng-repeat="track in queue.tracks" ng-click="playTrackFromIndex($index)">
-					<img
-						ng-src="{{queue.nowPlaying.index == $index ? 'http://i.imgur.com/zKQ3N8e.gif' : (track.album.images[0].url || queue.source.images[0].url)}}"
-						class="md-avatar no-mask"
-						alt="{{track.name}}"/>
-					
-					<div class="md-list-item-text">
-						<h3>{{track.name}}</h3>
-						<p>{{track.artists[0].name}}</p>
-					</div>
-			</md-list>			
-		</div>
-	</div>
-	
-	<div class="playerBar" layout="row" layout-align="center end" style="z-index: 2" ng-show="queue.nowPlaying.streamUrl">
-		<md-card flex="70" layout="row">
-			<audio
-				id="song"
-				controls
-				autoplay
-				ng-src="{{queue.nowPlaying.streamUrl}}"
-				style="width: 100% !important;">
-			</audio>
-			
-			<md-button class="md-icon-button" ng-click="openLyrics($event)">
-				<md-icon class="material-icons">music_note</md-icon>
-			</md-button>
-		</md-card>
-	</div>
-	
-	<!-- Angular Material requires Angular.js Libraries -->
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
-
-	<!-- Angular Material Library -->
-	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
-	
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-audio/1.7.4/angular.audio.min.js"></script>
-
-	<!-- Your application bootstrap  -->
-	<script type="text/javascript">
-		/* global angular */
-		var app = angular.module('jukebox', ['ngMaterial', 'ngAudio']);
-
-		app.controller('MainCtrl', ['$scope', '$http', 'ngAudio', '$location', '$mdMenu', '$mdDialog', function($scope, $http, ngAudio, $location, $mdMenu, $mdDialog) {
-			$scope.$location = $location;
-			$scope.$mdMenu = $mdMenu;
-			$scope.queue = {
-				nowPlaying: {
-					index: 0
-				}
-			};
-			
-			$scope.search = function(query, limit, offset) {
-				$http({
-					url: '/api/search',
-					method: 'GET',
-					params: {
-						q: query,
-						limit: limit,
-						offset: offset
-					}
-				}).then(function(response) {
-					$scope.searchResults = {
-						albums: response.data.albums.items,
-						artists: response.data.artists.items,
-						playlists: response.data.playlists.items
-					};
-				});
-			};
-			
-			$scope.loadSuggestions = function(query) {
-				return $http.get('/api/tracks/search?q='+ query)
-					.then(function(response) {
-						return response.data.body.tracks.items;
-					});
-			};
-			
-			$scope.createNewQueue = function(dataType, i, item) {
-				var promise;
-				
-				switch (dataType) {
-					case 'albums':
-						promise = $http.get('/api/albums/'+item.id+'/tracks');
-						break;
-					case 'playlists':
-						promise = $http.get('/api/users/'+item.owner.id+'/playlists/'+item.id+'/tracks');
-						break;
-				}
-				
-				promise.then(function(response) {
-					$scope.queue.source = $scope.searchResults[dataType][i];
-					$scope.queue.tracks = (dataType == 'playlists' ? response.data.items.map(o => o.track) : response.data.items);
-					$scope.queue.nowPlaying.index = 0;
-					$scope.playTrack($scope.queue.tracks[0]);
-				});
-			};
-
-			$scope.playTrack = function(track) {
-				var artistName = track.artists[0].name,
-					trackName = track.name;
-				
-				$scope.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+artistName+'&track='+trackName;
-				$scope.$apply();
-			};
-			
-			$scope.playTrackFromIndex = function(index) {
-				$scope.queue.nowPlaying.index = index;
-				$scope.playTrack($scope.queue.tracks[index]);
-			};
-			
-			$scope.openLyrics = function(event) {
-				var track = $scope.queue.tracks[$scope.queue.nowPlaying.index];
-				$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
-					$mdDialog.show({
-						parent: angular.element(document.body),
-						targetEvent: event,
-						template:
-						   `<h3>Lyrics:</h3>
-							<p style="white-space: pre;">
-								{{track.lyrics}}
-							</p>
-							<p>
-								Lyrics from
-								<a href="{{track.url}}" target="_blank">MetroLyrics</a>
-							</p>`,
-						locals: {
+						<md-button class="md-icon-button" ng-show="!showSearch" ng-click="showSearch = !showSearch">
+							<md-icon class="material-icons">search</md-icon>
+						</md-button>
+						
+						<md-button
+							class="md-icon-button"
+							aria-label="Open queue"
+							ng-click="Player.pinnedQueue = true"
+							ng-show="!$mdMedia('gt-md') || !Player.pinnedQueue">
 							
-						},
-						controller: ['$scope', function($scope) {
-							$scope.track = response.data;
-						}],
-						clickOutsideToClose: true
-					});
-				});
-			};
+							<md-icon class="material-icons">queue_music</md-icon>
+						</md-button>
+					</div>
+				</div>
+	    	</md-toolbar>
+		    
+		    <md-content flex>
+		    	<ui-view></ui-view>
+		    </md-content>
 			
-			document.getElementById('song').onended = function() {
-				$scope.queue.nowPlaying.index++;
-			    $scope.playTrackFromIndex($scope.queue.nowPlaying.index);
-			};
-		}]);
+			<!--<md-content layout="row" flex>
+				<div flex layout="row" layout-align="space-around stretch">
+					<div ng-show="searchResults" flex ng-repeat="section in ['albums', 'artists', 'playlists']" class="scroll-container">
+						<md-list flex>
+							<md-subheader class="md-no-sticky">{{section | capitalize}}</md-subheader>
+							
+							<md-list-item class="md-2-line" ng-repeat="item in searchResults[section]" ng-click="setQueue(section, $index, item)">
+								<img ng-src="{{item.images[0].url}}" class="md-avatar no-mask" alt="{{todos[0].who}}"/>
+								
+								<div class="md-list-item-text">
+									<h3>{{item.name}}</h3>
+									<p>{{item.artists[0].name || item.owner.id}}</p>
+								</div>
+							</md-list-item>
+						</md-list>
+					</div>
+				</div>
+			</md-content>-->
+			
+			<playbar></playbar>
+		</section>
 		
-		app.filter('capitalize', function() {
-			return function(token) {
-				return token.charAt(0).toUpperCase() + token.slice(1);
-			};
-		});
-	</script>
-	
-</body>
-</html>
+		<md-sidenav
+			class="md-sidenav-right"
+			md-component-id="right"
+			md-is-locked-open="Player.pinnedQueue || $mdMedia('gt-md')"
+			md-whiteframe="10">
+			
+			<queue></queue>
+		</md-sidenav>
+		
+		<!-- Angular Material requires Angular.js Libraries -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+
+		<!-- Angular Material Library -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+		
+		<script src="//unpkg.com/angular-ui-router/release/angular-ui-router.min.js"></script> <!-- UI Router -->
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> <!-- Socket.io -->
+		<script type="text/javascript" src="https://cdn.rawgit.com/btford/angular-socket-io/master/socket.js"></script> <!-- Angular Socket.io -->
+		<script type="text/javascript" src="https://cdn.rawgit.com/jariz/vibrant.js/master/dist/Vibrant.js"></script> <!-- Vibrant -->
+		<script type="text/javascript" src="https://cdn.rawgit.com/maxjoehnk/ngVibrant/fd9c068d/dist/angular-vibrant.js"></script> <!-- Angular Vibrant -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-audio/1.7.4/angular.audio.min.js"></script>
+
+		<!-- Your application bootstrap  -->
+		<script type="text/javascript">
+			/* global angular */
+			var app = angular.module('jukebox', ['ngMaterial', 'ngAnimate', 'ui.router', 'btford.socket-io', 'ngVibrant']);
+			
+			app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+				var states = [
+					{
+						name: 'browse',
+						url: '/',
+						templateUrl: 'views/browse/browse.html'
+					},
+					{
+						name: 'search',
+						url: '/search?q',
+						templateUrl: 'views/search/search.html',
+						controller: 'SearchCtrl'
+					}
+				];
+				
+				for (var i in states) {
+					$stateProvider.state(states[i]);
+				}
+				
+				$urlRouterProvider.otherwise('/');
+			}]);
+			
+			app.config(['$mdThemingProvider', function($mdThemingProvider) {
+				$mdThemingProvider.theme('light').primaryPalette('blue-grey');
+				$mdThemingProvider.theme('dark').primaryPalette('blue-grey').dark();
+				
+				$mdThemingProvider.setDefaultTheme('dark');
+				// $mdThemingProvider.enableBrowserColor({theme: 'dark'});
+			}]);
+
+			app.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$state', '$location', '$mdMenu', '$mdDialog', '$mdToast', 'Socket', 'Player',
+				function($scope, $rootScope, $http, $state, $location, $mdMenu, $mdDialog, $mdToast, Socket, Player) {
+					
+				$scope.$location = $location;
+				$scope.$mdMenu = $mdMenu;
+				$scope.Player = Player;
+				$rootScope.$state = $state;
+				
+				$scope.openLyrics = function(event) {
+					Socket.emit('lyrics:open', {event: event});
+					
+					var track = Player.queue.source.tracks.items[Player.queue.nowPlaying.index];
+					$http.get('/api/tracks/lyrics?track_id='+ track.id).then(function(response) {
+						$mdDialog.show({
+							parent: angular.element(document.body),
+							targetEvent: event,
+							templateUrl: '/views/lyrics/lyrics.html',
+							locals: {
+								
+							},
+							controller: ['$scope', function($scope) {
+								$scope.track = response.data;
+							}],
+							clickOutsideToClose: true
+						});
+					});
+				};
+			}]);
+		</script>
+		
+		<script type="text/javascript" src="components/socket/socket.factory.js"></script>
+		
+		<script type="text/javascript" src="apis/spotify.service.js"></script>
+		
+		<script type="text/javascript" src="components/player/player.service.js"></script>
+		
+		<script type="text/javascript" src="views/search/search.controller.js"></script>
+		
+		<script type="text/javascript" src="components/player/playbar/playbar.directive.js"></script>
+		<script type="text/javascript" src="components/player/seekbar/seekbar.directive.js"></script>
+		<script type="text/javascript" src="components/queue/queue.directive.js"></script>
+		
+		<script type="text/javascript" src="components/lists/albums/albums.directive.js"></script>
+		<script type="text/javascript" src="components/lists/artists/artists.directive.js"></script>
+		<script type="text/javascript" src="components/lists/playlists/playlists.directive.js"></script>
+		<script type="text/javascript" src="components/lists/tracks/tracks.directive.js"></script>
+		<script type="text/javascript" src="components/album/album.directive.js"></script>
+		<script type="text/javascript" src="components/artist/artist.directive.js"></script>
+		
+		<script type="text/javascript" src="filters/capitalize.filter.js"></script>
+		<script type="text/javascript" src="filters/seconds-time.filter.js"></script>
+		
+	</body>
+	</html>

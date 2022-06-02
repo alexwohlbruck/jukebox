@@ -1,0 +1,44 @@
+<md-toolbar layout="row" md-whiteframe="2dp">
+    <div class="md-toolbar-tools">
+		<h1 class="md-subhead" flex md-truncate>Up next</h1>
+		
+		<md-button class="md-icon-button" aria-label="Save as playlist">
+            <md-icon class="material-icons">playlist_add</md-icon>
+        </md-button>
+        
+        <md-button class="md-icon-button" aria-label="Share queue">
+            <md-icon class="material-icons">share</md-icon>
+        </md-button>
+        
+        <md-button class="md-icon-button" aria-label="Clear queue">
+            <md-icon class="material-icons">clear_all</md-icon>
+        </md-button>
+        
+        <md-button class="md-icon-button" aria-label="Close queue" ng-click="Player.pinnedQueue = false">
+            <md-icon class="material-icons">close</md-icon>
+        </md-button>
+    </div>
+</md-toolbar>
+
+<div class="people" layout="row" layout-align="center center">
+    <img
+        class="person md-avatar small"
+        ng-repeat="person in [1, 2, 3, 4]"
+        ng-src="https://i.imgur.com/XtGnc70.png"
+        md-whiteframe="3dp"/>
+</div>
+    
+<md-list flex class="tracks">
+    <md-list-item class="md-2-line track" ng-repeat="track in Player.queue.source.tracks.items" ng-click="alert('hi')">
+        <img ng-show="track.album.images[0].url" src="{{track.album.images[0].url}}" alt="" class="md-avatar square">
+        
+        <div layout="row">
+            <p class="index">{{$index - Player.queue.nowPlaying.index}}</p>
+            
+            <div class="md-list-item-text">
+                <h3 md-truncate>{{track.name}}</h3>
+                <p md-truncate>{{track.artists[0].name}}</p>
+            </div>
+        </div>
+    </md-list-item>
+</md-list>
