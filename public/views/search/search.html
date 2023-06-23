@@ -1,9 +1,27 @@
 <div class="md-padding">
     <p class="md-headline" style="margin: 5px 20px;">Artists</p>
-    <artists data="results.artists.items"></artists>
+    <div class="row">
+       <artists data="results.artists.items.slice(0, 13)"></artists>
+    </div>
 </div>
 
 <div class="md-padding">
     <p class="md-headline" style="margin: 5px 20px;">Albums</p>
-    <albums data="results.albums.items"></albums>
+    <div class="row">
+        <albums data="results.albums.items.slice(0, 9)"></albums>
+        <albums data="results.albums.items.slice(10, 19)"></albums>
+    </div>
 </div>
+<!--<div class="md-padding">
+    <p class="md-headline" style="margin: 5px 20px;">Playlists</p>
+    <div class="row">
+        <playlist data="playlistData"></playlist>
+    </div>
+</div>
+<div class="md-padding">
+    <p class="md-headline" style="margin: 5px 20px;">Tracks</p>
+    <div class="row">
+        <playlist data="playlistData"></playlist>
+    </div>
+</div>
+-->

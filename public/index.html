@@ -1,9 +1,10 @@
 <html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
 	<head>
 		<title ng-bind="queue.nowPlaying.streamUrl ? (queue.tracks[queue.nowPlaying.index].name + ' - ' + queue.tracks[queue.nowPlaying.index].artists[0].name) : 'Jukebox Redux'">
-			Jukebox Redux
+			Ltunes
 		</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+    
 		<link rel="stylesheet" type="text/css" href="css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
@@ -21,9 +22,8 @@
 
 			<md-toolbar class="md-hue-2" md-whiteframe="2dp">
 				<div class="md-toolbar-tools" layout="row" layout-align="space-between center">
-					<h2 flex="10" md-truncate>Jukebox</h2>
+					<h2 flex="10" md-truncate ng-click="$state.transitionTo('browse')">Jukebox</h2>
 					
-					<p>Latency: {{Player.latency}}</p>
 					
 					<div layout="row" layout-align="center center">
 						<form ng-submit="$state.go('search', {q: searchQuery})" style="margin: 0;">
@@ -37,14 +37,14 @@
 							<md-icon class="material-icons">search</md-icon>
 						</md-button>
 						
-						<md-button
+						<!--<md-button
 							class="md-icon-button"
 							aria-label="Open queue"
 							ng-click="Player.pinnedQueue = true"
 							ng-show="!$mdMedia('gt-md') || !Player.pinnedQueue">
 							
 							<md-icon class="material-icons">queue_music</md-icon>
-						</md-button>
+						</md-button>-->
 					</div>
 				</div>
 	    	</md-toolbar>
