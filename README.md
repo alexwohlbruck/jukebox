@@ -1,3 +1,26 @@
+
+# Jukebox Redux
+#### By Alex Wohlbruck
+##### Maintained by: LaganYT
+
+### Desctiption:
+
+Jukebox: Elevate Your Music Experience with Seamless Listening and Downloading
+
+Welcome to Jukebox, the ultimate destination for music lovers. Discover, stream, and download your favorite tunes effortlessly. Our intuitive interface immerses you in a world of melodious bliss, whether you're a casual listener or an audiophile.
+
+Discover: Explore a vast music library, curated playlists, and hidden gems. Our passionate curators bring you the best of the best.
+
+Listen: Enjoy crystal-clear audio quality with uninterrupted playback. Create playlists, save favorites, and rediscover beloved tracks.
+
+Download: Take your music offline hassle-free. Enjoy your tunes wherever you go.
+
+User-Friendly Experience: Find what you want easily with our streamlined design and intuitive navigation.
+
+Join Jukebox today and unlock a world of musical wonders. Discover, rediscover, and build the perfect playlist. Let the melodies resonate, the rhythm flow, and the beats transport you to new heights of musical euphoria. Get ready for a unique musical journey with Jukebox.
+
+*Jukebox is made for desktop devices, not supported by mobile.
+
 # Paid Setup process:
 
 Step 1: Go to [heroku](https://dashboard.heroku.com/apps) and create a new app.
@@ -42,3 +65,20 @@ Make an [issue](https://github.com/alexwohlbruck/jukebox/issues) if you have pro
 
 
 This is a README.md file made by LaganYT for the self hosting of the Jukebox project.
+
+## Authors
+
+- [@LaganYT](https://www.github.com/laganyt)
+- [@alexwohlbruck](https://www.github.com/alexwohlbruck)
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+
+## Used By
+
+This project is used by/maintained the following companies:
+
+- [LTunes](https://ltunes.gq/)
