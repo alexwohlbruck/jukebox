@@ -1,3 +1,5 @@
 <div class="container" layout="row">
-    <artist ng-repeat="artist in data" data="artist"></artist>
+      <a style="text-decoration: none;color: inherit;cursor: pointer;" ng-repeat="artist in data" ng-href="/artist/{{artist.id}}">
+    <artist data="artist"></artist>
+  </a>
 </div>

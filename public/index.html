@@ -3,7 +3,7 @@
     <title
       ng-bind="queue.nowPlaying.streamUrl ? (queue.tracks[queue.nowPlaying.index].name + ' - ' + queue.tracks[queue.nowPlaying.index].artists[0].name) : 'Jukebox Redux'"
     >
-      Ltunes
+      Jukebox Redux
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -36,7 +36,7 @@
           layout-align="space-between center"
         >
           <h2 flex="10" md-truncate ng-click="$state.transitionTo('browse')">
-            <div ng-click="showSearch = !showSearch">Jukebox</div>
+            <div class="link">Jukebox</div>
           </h2>
 
           <div layout="row" layout-align="center center">
@@ -44,31 +44,11 @@
               ng-submit="$state.go('search', {q: searchQuery})"
               style="margin: 0"
             >
-              <md-input-container
-                ng-show="showSearch || searchClicked"
-                class="no-error"
-              >
+              <md-input-container class="no-error">
                 <label>Search</label>
                 <input ng-model="searchQuery" />
               </md-input-container>
             </form>
-
-            <md-button
-              class="md-icon-button"
-              ng-click="showSearch = true; searchClicked = true"
-              ng-show="!showSearch"
-            >
-              <md-icon class="material-icons">search</md-icon>
-            </md-button>
-
-            <!--<md-button
-		class="md-icon-button"
-		aria-label="Open queue"
-		ng-click="Player.pinnedQueue = true"
-		ng-show="!$mdMedia('gt-md') || !Player.pinnedQueue">
-		
-		<md-icon class="material-icons">queue_music</md-icon>
-	</md-button>-->
           </div>
         </div>
       </md-toolbar>
@@ -257,6 +237,21 @@
           };
         },
       ]);
+      
+          app.controller('ArtistController', ['$scope', '$http', function($scope, $http) {
+      // Extract artist ID from the URL
+      var urlParts = window.location.pathname.split('/');
+      var artistId = urlParts[urlParts.length - 1];
+
+      // Fetch artist data from the server
+      $http.get('/artist/' + artistId)
+        .then(function(response) {
+          $scope.artistData = response.data;
+        })
+        .catch(function(error) {
+          console.error(error);
+        });
+    }]);
     </script>
 
     <script
@@ -319,5 +314,15 @@
       type="text/javascript"
       src="filters/seconds-time.filter.js"
     ></script>
+    <style>
+    .link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: none;
+}
+    </style>
   </body>
 </html>

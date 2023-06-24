@@ -1,4 +1,4 @@
-<md-card class="player md-whiteframe-6dp" flex="100" layout="row" md-theme="{{Player.queue.nowPlaying.theme}}" md-theme-watch ng-style="{'background-color': Player.queue.nowPlaying.swatches.Vibrant.getHex() || '#222'}">
+<md-card class="player md-whiteframe-6dp" flex="100" layout="row" md-theme="{{Player.queue.nowPlaying.theme}}" md-theme-watch ng-style="{'background-color:#222'}">
 
     <img class="cover" ng-src="{{Player.queue.tracks.items[Player.queue.nowPlaying.index].album.images[0].url || Player.queue.source.images[1].url || Player.queue.source.images[0].url}}" vibrant ng-model="Player.queue.nowPlaying.swatches" crossorigin="anonymous" />
 
@@ -16,38 +16,43 @@
                 </p>
             </div>
 
-            <div class="center">
-                <!--<md-button class="md-icon-button" aria-label="Loop song">
-                    <md-icon class="material-icons">loop</md-icon>
-                </md-button>-->
+<div class="center">
+<!--    <md-button class="md-icon-button" aria-label="Loop song" ng-click="Player.toggleLoop()">
+        <md-icon class="material-icons" ng-class="{'active': Player.queue.nowPlaying.loop !== 'loop_off', 'queue-loop': Player.queue.nowPlaying.loop === 'loop_queue', 'single-loop': Player.queue.nowPlaying.loop === 'loop_song'}">{{Player.queue.nowPlaying.loop}}</md-icon>
+    </md-button>-->
 
-                <md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skip('prev')">
-                    <md-icon class="material-icons">skip_previous</md-icon>
-                </md-button>
+    <md-button class="md-icon-button" aria-label="Skip previous" ng-click="Player.skip('prev')">
+        <md-icon class="material-icons">skip_previous</md-icon>
+    </md-button>
 
-                <md-button class="md-icon-button" aria-label="Play/Pause" ng-click="Player.plause()">
-                    <md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
-                </md-button>
+    <md-button class="md-icon-button" aria-label="Play/Pause" ng-click="Player.plause()">
+        <md-icon class="material-icons">{{Player.el.paused ? 'play_arrow' : 'pause'}}</md-icon>
+    </md-button>
 
-                <md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skip('next')">
-                    <md-icon class="material-icons">skip_next</md-icon>
-                </md-button>
+    <md-button class="md-icon-button" aria-label="Skip next" ng-click="Player.skip('next')">
+        <md-icon class="material-icons">skip_next</md-icon>
+    </md-button>
 
-                <!--<md-button class="md-icon-button" aria-label="Shuffle">
-                    <md-icon class="material-icons">shuffle</md-icon>
-                </md-button>
-            </div>
+<!--    <md-button class="md-icon-button" aria-label="Shuffle" ng-click="Player.toggleShuffle()" ng-class="{'active': Player.queue.nowPlaying.shuffle}">
+        <md-icon class="material-icons">shuffle</md-icon>
+    </md-button>-->
 
+    <!-- Download Button -->
+    <md-button class="md-icon-button" aria-label="Download" ng-click="Player.downloadTrack()">
+        <md-icon class="material-icons">file_download</md-icon>
+    </md-button>
+</div>
+
+
+
+
+<!--
                 <md-button class="md-icon-button" aria-label="Open Lyrics" ng-click="openLyrics($event)">
                   <md-icon class="material-icons">music_note</md-icon>
-                </md-button>
+                </md-button>-->
 
 
-                <!-- Download Button -->
-    <md-button class="md-icon-button" aria-label="Download" ng-click="Player.downloadTrack()">
-    <md-icon class="material-icons">file_download</md-icon>
-</md-button>
+
             </div>
         </div>
-  </div>
 </md-card>

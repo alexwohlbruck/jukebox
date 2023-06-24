@@ -19,8 +19,21 @@ app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($ro
             index: 0,
             paused: true,
             track: null,
-            progress: 0
+            progress: 0,
+            loop: 'loop_off',
+            shuffle: false
         }
+    };
+
+    this.toggleLoop = function() {
+        var loopModes = ['loop_queue', 'loop_song', 'loop_off'];
+        var currentIndex = loopModes.indexOf(Player.queue.nowPlaying.loop);
+        var newIndex = (currentIndex + 1) % loopModes.length;
+        Player.queue.nowPlaying.loop = loopModes[newIndex];
+    };
+
+    this.toggleShuffle = function() {
+        Player.queue.nowPlaying.shuffle = !Player.queue.nowPlaying.shuffle;
     };
 
 this.play = function(source) {
@@ -46,11 +59,6 @@ this.play = function(source) {
         Player.el.play();
     }
 };
-
-
-
-
-
 
 
   

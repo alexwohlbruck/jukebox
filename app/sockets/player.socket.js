@@ -26,6 +26,20 @@ module.exports = function(io) {
 
             io.emit('queue:set', source);
         },
+      
+toggleShuffle(state) {
+    // Implement your logic for toggling shuffle
+    this.queue.nowPlaying.shuffle = state ? 'shuffle' : 'shuffle_disabled';
+    io.emit('playback:shuffle', state);
+},
+
+toggleRepeat(state) {
+    // Implement your logic for toggling repeat
+    this.queue.nowPlaying.loop = state ? 'repeat' : 'repeat_one';
+    io.emit('playback:repeat', state);
+},
+
+
 
         clearQueue() {
             this.queue.source = {
