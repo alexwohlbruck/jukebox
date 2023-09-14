@@ -4,7 +4,7 @@ var keys = require.main.require('./config/keys');
 var spotify = require.main.require('./app/services/spotify');
 var google = require('googleapis');
 var youtube = google.youtube('v3');
-var ytdl = require('ytdl-core');
+var ytdl = require('node-ytdl-core-v2');
 var request = require('request-promise');
 var cheerio = require('cheerio');
 
