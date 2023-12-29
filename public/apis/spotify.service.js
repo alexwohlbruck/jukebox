@@ -1,244 +1,360 @@
 /* global angular */
-var app = angular.module('jukebox');
+var app = angular.module("jukebox");
 
-app.service('Spotify', ['$http', function($http) {
-    this.getTrack = function() {
-        // TODO
+app.service("Spotify", [
+  "$http",
+  function ($http) {
+    this.getTrack = function (trackId) {
+      return $http.get("/api/tracks/" + trackId);
     };
-    
-    this.getTracks = function() {
-        // TODO
+
+    this.getTracks = function (trackIds) {
+      return $http.get("/api/tracks?ids=" + trackIds.join(","));
     };
-    
-    this.getAlbum = function(albumId) {
-        return $http.get('/api/albums/' + albumId);
+
+    this.getAlbum = function (albumId) {
+      return $http.get("/api/albums/" + albumId);
     };
-    
-    this.getAlbums = function() {
-        // TODO
+
+    this.getAlbums = function (albumIds) {
+      return $http.get("/api/albums?ids=" + albumIds.join(","));
     };
-    
-    this.getArtist = function() {
-        // TODO
+
+    this.getArtist = function (artistId) {
+      return $http.get("/api/artists/" + artistId);
     };
-    
-    this.getArtists = function() {
-        // TODO
+
+    this.getArtists = function (artistIds) {
+      return $http.get("/api/artists?ids=" + artistIds.join(","));
     };
-    
-    this.search = function() {
-        // TODO
+
+    this.search = function (query) {
+      return $http.get("/api/search?q=" + query);
     };
-    
-    this.searchAlbums = function() {
-        // TODO
+
+    this.searchAlbums = function (query) {
+      return $http.get("/api/search?type=album&q=" + query);
     };
-    
-    this.searchArtists = function() {
-        // TODO
+
+    this.searchArtists = function (query) {
+      return $http.get("/api/search?type=artist&q=" + query);
     };
-    
-    this.searchTracks = function() {
-        // TODO
+
+    this.searchTracks = function (query) {
+      return $http.get("/api/search?type=track&q=" + query);
     };
-    
-    this.searchPlaylists = function() {
-        // TODO
+
+    this.searchPlaylists = function (query) {
+      return $http.get("/api/search?type=playlist&q=" + query);
     };
-    
-    this.getArtistAlbums = function() {
-        // TODO
+
+    this.getAlbumTracks = function (albumId) {
+      return $http.get("/api/albums/" + albumId + "/tracks");
     };
-    
-    this.getAlbumTracks = function(albumId) {
-        return $http.get('/api/albums/' + albumId + '/tracks');
+
+    this.getArtistTopTracks = function (artistId) {
+      return $http.get("/api/artists/" + artistId + "/top-tracks");
     };
-    
-    this.getArtistTopTracks = function() {
-        // TODO
+
+    this.getArtistRelatedArtists = function (artistId) {
+      return $http.get("/api/artists/" + artistId + "/related-artists");
     };
-    
-    this.getArtistRelatedArtists = function() {
-        // TODO
+
+    this.getUser = function (userId) {
+      return $http.get("/api/users/" + userId);
     };
-    
-    this.getUser = function() {
-        // TODO
+
+    this.getMe = function () {
+      return $http.get("/api/me");
     };
-    
-    this.getMe = function() {
-        // TODO
+
+    this.getUserPlaylists = function (userId) {
+      return $http.get("/api/users/" + userId + "/playlists");
     };
-    
-    this.getUserPlaylists = function() {
-        // TODO
+
+    this.getPlaylist = function (playlistId) {
+      return $http.get("/api/playlists/" + playlistId);
     };
-    
-    this.getPlaylist = function() {
-        // TODO
+
+    this.getPlaylistTracks = function (playlistId) {
+      return $http.get("/api/playlists/" + playlistId + "/tracks");
     };
-    
-    this.getPlaylistTracks = function() {
-        // TODO
+
+    this.createPlaylist = function (userId, playlistData) {
+      return $http.post("/api/users/" + userId + "/playlists", playlistData);
     };
-    
-    this.createPlaylist = function() {
-        // TODO
+
+    this.followPlaylist = function (playlistId) {
+      return $http.put("/api/playlists/" + playlistId + "/follow");
     };
-    
-    this.followPlaylist = function() {
-        // TODO
+
+    this.unfollowPlaylist = function (playlistId) {
+      return $http.delete("/api/playlists/" + playlistId + "/follow");
     };
-    
-    this.unfollowPlaylist = function() {
-        // TODO
+
+    this.changePlaylistDetails = function (playlistId, updatedData) {
+      return $http.put("/api/playlists/" + playlistId, updatedData);
     };
-    
-    this.changePlaylistDetails = function() {
-        // TODO
+
+    this.addTracksToPlaylist = function (playlistId, trackUris) {
+      return $http.post("/api/playlists/" + playlistId + "/tracks", trackUris);
     };
-    
-    this.addTracksToPlaylist = function() {
-        // TODO
+
+    this.removeTracksFromPlaylist = function (playlistId, trackUris) {
+      var config = {
+        data: { tracks: trackUris },
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+      };
+      return $http.delete("/api/playlists/" + playlistId + "/tracks", config);
     };
-    
-    this.removeTracksFromPlaylist = function() {
-        // TODO
+
+    this.removeTracksFromPlaylistByPosition = function (playlistId, positions) {
+      var config = {
+        data: { positions: positions },
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+      };
+      return $http.delete(
+        "/api/playlists/" + playlistId + "/tracks/positions",
+        config
+      );
     };
-    
-    this.removeTracksFromPlaylistByPosition = function() {
-        // TODO
+
+    this.replaceTracksInPlaylist = function (playlistId, trackUris) {
+      return $http.put("/api/playlists/" + playlistId + "/tracks", trackUris);
     };
-    
-    this.replaceTracksInPlaylist = function() {
-        // TODO
+
+    this.reorderTracksInPlaylist = function (
+      playlistId,
+      rangeStart,
+      insertBefore
+    ) {
+      return $http.put("/api/playlists/" + playlistId + "/tracks/reorder", {
+        range_start: rangeStart,
+        insert_before: insertBefore,
+      });
     };
-    
-    this.reorderTracksInPlaylist = function() {
-        // TODO
+
+    this.getAudioFeaturesForTrack = function (trackId) {
+      return $http.get("/api/audio-features/" + trackId);
     };
-    
-    this.getAudioFeaturesForTrack = function() {
-        // TODO
+
+    this.getAudioFeaturesForTracks = function (trackIds) {
+      return $http.get("/api/audio-features?ids=" + trackIds.join(","));
     };
-    
-    this.getAudioFeaturesForTracks = function() {
-        // TODO
+
+    this.getRecommendations = function (options) {
+      var queryParams = buildRecommendationQueryParams(options);
+      return $http.get("/api/recommendations" + queryParams);
     };
-    
-    this.getRecommendations = function() {
-        // TODO
+
+    this.getAvailableGenreSeeds = function () {
+      return $http.get("/api/recommendations/available-genre-seeds");
     };
-    
-    this.getAvailableGenreSeeds = function() {
-        // TODO
+
+    this.clientCredentialsGrant = function () {
+      // TODO: Implement client credentials grant
     };
-    
-    this.clientCredentialsGrant = function() {
-        // TODO
+
+    this.authorizationCodeGrant = function () {
+      // TODO: Implement authorization code grant
     };
-    
-    this.authorizationCodeGrant = function() {
-        // TODO
+
+    this.refreshAccessToken = function () {
+      // TODO: Implement access token refresh
     };
-    
-    this.refreshAccessToken = function() {
-        // TODO
+
+    this.createAuthorizeURL = function () {
+      // TODO: Implement create authorize URL
     };
-    
-    this.createAuthorizeURL = function() {
-        // TODO
+
+    this.getMySavedTracks = function () {
+      return $http.get("/api/me/tracks");
     };
-    
-    this.getMySavedTracks = function() {
-        // TODO
+
+    this.containsMySavedTracks = function (trackIds) {
+      return $http.get("/api/me/tracks/contains?ids=" + trackIds.join(","));
     };
-    
-    this.containsMySavedTracks = function() {
-        // TODO
+
+    this.removeFromMySavedTracks = function (trackIds) {
+      return $http.delete("/api/me/tracks", { data: { ids: trackIds } });
     };
-    
-    this.removeFromMySavedTracks = function() {
-        // TODO
+
+    this.addToMySavedTracks = function (trackIds) {
+      return $http.put("/api/me/tracks", { ids: trackIds });
     };
-    
-    this.addToMySavedTracks = function() {
-        // TODO
+
+    this.removeFromMySavedAlbums = function (albumIds) {
+      return $http.delete("/api/me/albums", { data: { ids: albumIds } });
     };
-    
-    this.removeFromMySavedAlbums = function() {
-        // TODO
+
+    this.addToMySavedAlbums = function (albumIds) {
+      return $http.put("/api/me/albums", { ids: albumIds });
     };
-    
-    this.addToMySavedAlbums = function() {
-        // TODO
+
+    this.getMySavedAlbums = function () {
+      return $http.get("/api/me/albums");
     };
-    
-    this.getMySavedAlbums = function() {
-        // TODO
+
+    this.containsMySavedAlbums = function (albumIds) {
+      return $http.get("/api/me/albums/contains?ids=" + albumIds.join(","));
     };
-    
-    this.containsMySavedAlbums = function() {
-        // TODO
+
+    this.getMyTopArtists = function () {
+      return $http.get("/api/me/top-artists");
     };
-    
-    this.getMyTopArtists = function() {
-        // TODO
+
+    this.getMyTopTracks = function () {
+      return $http.get("/api/me/top-tracks");
     };
-    
-    this.getMyTopTracks = function() {
-        // TODO
+
+    this.followUsers = function (userIds) {
+      return $http.put("/api/me/following", { ids: userIds });
     };
-    
-    this.followUsers = function() {
-        // TODO
+
+    this.followArtists = function (artistIds) {
+      return $http.put("/api/me/following?type=artist", { ids: artistIds });
     };
-    
-    this.followArtists = function() {
-        // TODO
+
+    this.unfollowUsers = function (userIds) {
+      return $http.delete("/api/me/following", { data: { ids: userIds } });
     };
-    
-    this.unfollowUsers = function() {
-        // TODO
+
+    this.unfollowArtists = function (artistIds) {
+      return $http.delete("/api/me/following?type=artist", {
+        data: { ids: artistIds },
+      });
     };
-    
-    this.unfollowArtists = function() {
-        // TODO
+
+    this.isFollowingUsers = function (userIds) {
+      return $http.get(
+        "/api/me/following/contains?type=user&ids=" + userIds.join(",")
+      );
     };
-    
-    this.isFollowingUsers = function() {
-        // TODO
+
+    this.getFollowedArtists = function () {
+      return $http.get("/api/me/following?type=artist");
     };
-    
-    this.getFollowedArtists = function() {
-        // TODO
+
+    this.areFollowingPlaylist = function (playlistId, userIds) {
+      return $http.get(
+        "/api/playlists/" +
+          playlistId +
+          "/followers/contains?ids=" +
+          userIds.join(",")
+      );
     };
-    
-    this.areFollowingPlaylist = function() {
-        // TODO
+
+    this.isFollowingArtists = function (artistIds) {
+      return $http.get(
+        "/api/me/following/contains?type=artist&ids=" + artistIds.join(",")
+      );
     };
-    
-    this.isFollowingArtists = function() {
-        // TODO
+
+    this.getNewReleases = function (options) {
+      var queryParams = buildNewReleasesQueryParams(options);
+      return $http.get("/api/browse/new-releases" + queryParams);
     };
-    
-    this.getNewReleases = function() {
-        // TODO
+
+    this.getFeaturedPlaylists = function (options) {
+      var queryParams = buildFeaturedPlaylistsQueryParams(options);
+      return $http.get("/api/browse/featured-playlists" + queryParams);
     };
-    
-    this.getFeaturedPlaylists = function() {
-        // TODO
+
+    this.getCategories = function (options) {
+      var queryParams = buildCategoriesQueryParams(options);
+      return $http.get("/api/browse/categories" + queryParams);
     };
-    
-    this.getCategories = function() {
-        // TODO
+
+    this.getCategory = function (categoryId, options) {
+      var queryParams = buildCategoryQueryParams(options);
+      return $http.get("/api/browse/categories/" + categoryId + queryParams);
     };
-    
-    this.getCategory = function() {
-        // TODO
+
+    this.getPlaylistsForCategory = function (categoryId, options) {
+      var queryParams = buildCategoryPlaylistsQueryParams(options);
+      return $http.get(
+        "/api/browse/categories/" + categoryId + "/playlists" + queryParams
+      );
     };
-    
-    this.getPlaylistsForCategory = function() {
-        // TODO
-    };
-}]);
+
+    // Helper functions for building query parameters
+
+    function buildRecommendationQueryParams(options) {
+      var params = [];
+      if (options.seed_artists) {
+        params.push("seed_artists=" + options.seed_artists.join(","));
+      }
+      if (options.seed_genres) {
+        params.push("seed_genres=" + options.seed_genres.join(","));
+      }
+      if (options.seed_tracks) {
+        params.push("seed_tracks=" + options.seed_tracks.join(","));
+      }
+      if (options.limit) {
+        params.push("limit=" + options.limit);
+      }
+      return "?" + params.join("&");
+    }
+
+    function buildNewReleasesQueryParams(options) {
+      var params = [];
+      if (options.country) {
+        params.push("country=" + options.country);
+      }
+      if (options.limit) {
+        params.push("limit=" + options.limit);
+      }
+      return "?" + params.join("&");
+    }
+
+    function buildFeaturedPlaylistsQueryParams(options) {
+      var params = [];
+      if (options.country) {
+        params.push("country=" + options.country);
+      }
+      if (options.limit) {
+        params.push("limit=" + options.limit);
+      }
+      return "?" + params.join("&");
+    }
+
+    function buildCategoriesQueryParams(options) {
+      var params = [];
+      if (options.country) {
+        params.push("country=" + options.country);
+      }
+      if (options.locale) {
+        params.push("locale=" + options.locale);
+      }
+      if (options.limit) {
+        params.push("limit=" + options.limit);
+      }
+      return "?" + params.join("&");
+    }
+
+    function buildCategoryQueryParams(options) {
+      var params = [];
+      if (options.country) {
+        params.push("country=" + options.country);
+      }
+      if (options.locale) {
+        params.push("locale=" + options.locale);
+      }
+      return "?" + params.join("&");
+    }
+
+    function buildCategoryPlaylistsQueryParams(options) {
+      var params = [];
+      if (options.country) {
+        params.push("country=" + options.country);
+      }
+      if (options.limit) {
+        params.push("limit=" + options.limit);
+      }
+      if (options.offset) {
+        params.push("offset=" + options.offset);
+      }
+      return "?" + params.join("&");
+    }
+  },
+]);

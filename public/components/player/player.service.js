@@ -2,119 +2,123 @@
 var app = angular.module('jukebox');
 
 app.service('Player', ['$rootScope', 'Socket', '$http', '$mdToast', function($rootScope, Socket, $http, $mdToast) {
-	var Player = this;
-	
-	this.el = document.getElementById('song');
-	
-	this.pinnedQueue = true;
-	
-	this.queue = {
+    var Player = this;
+
+    this.el = new Audio();
+
+    this.pinnedQueue = true;
+
+    this.queue = {
         source: {
             id: null,
             type: null,
             tracks: [],
-            /* other spotify data */
+            /* other Spotify data */
         },
         nowPlaying: {
             index: 0,
             paused: true,
             track: null,
-            progress: 0
+            progress: 0,
+            loop: 'loop_off',
+            shuffle: false
         }
     };
-	
-	this.latency = 100;
-	this.maxLatency = 250;
-	
-	var pingTime, pongTime, latency, showedSlowConnectionToast = false;
-	
-	// Ping each client to test connection speed
-    setInterval(function() {
-        pingTime = new Date();
-        Socket.emit('connection:ping');
-    }, (5 * 1000));
-    
-	// Recieve pong and save response time
-	Socket.on('connection:pong', function() {
-        pongTime = new Date();
-    	Player.latency = latency = (pongTime - pingTime) / 2;
-        
-        if (latency > 1000 && !showedSlowConnectionToast) {
-			$mdToast.show($mdToast.simple().textContent('Connection too slow for synced music'));
-			showedSlowConnectionToast = true;
+
+    this.toggleLoop = function() {
+        var loopModes = ['loop_queue', 'loop_song', 'loop_off'];
+        var currentIndex = loopModes.indexOf(Player.queue.nowPlaying.loop);
+        var newIndex = (currentIndex + 1) % loopModes.length;
+        Player.queue.nowPlaying.loop = loopModes[newIndex];
+    };
+
+    this.toggleShuffle = function() {
+        Player.queue.nowPlaying.shuffle = !Player.queue.nowPlaying.shuffle;
+    };
+
+this.play = function(source) {
+    if (Player.queue.source.id === source.id && !source.tracks[source.index].isEmpty) {
+        // Same album, switch to the new song within the album
+        Player.queue.nowPlaying.index = source.index;
+        Player.updateStreamUrl();
+        Player.el.play();
+    } else {
+        // Different album or the selected song is empty, clear the queue and set the new source
+      this.queue.source = {
+                id: null,
+                type: null,
+                tracks: [],
+                /* other Spotify data */
+            };
+            this.queue.nowPlaying.index = 0;
+            this.queue.nowPlaying.paused = true;
+            this.queue.nowPlaying.track = null;
+            this.queue.nowPlaying.progress = 0;
+        Player.queue.source = source;
+        Player.updateStreamUrl();
+        Player.el.play();
+    }
+};
+
+
+  
+  Player.downloadTrack = function() {
+    var track = this.queue.source.tracks.items[this.queue.nowPlaying.index];
+    var artist = track.artists[0].name;
+    var trackName = track.name;
+    var trackUrl = '/api/tracks/mp3?artist=' + encodeURIComponent(artist) + '&track=' + encodeURIComponent(trackName);
+
+    // Open the track URL in a new browser tab
+    window.open(trackUrl, '_blank');
+};
+
+
+    this.plause = function() {
+        Player.queue.nowPlaying.paused = !Player.queue.nowPlaying.paused;
+        if (Player.queue.nowPlaying.paused) {
+            Player.el.pause();
+        } else {
+            Player.el.play();
         }
+    };
+  
+      this.skipTo = function(track) {
+        var trackIndex = Player.queue.source.tracks.items.indexOf(track);
+        if (trackIndex > -1) {
+            Player.queue.nowPlaying.index = trackIndex;
+            Player.updateStreamUrl();
+            Player.el.play();
+        }
+    };
+
+    this.skip = function(direction) {
+        if (direction === 'next') {
+            Player.queue.nowPlaying.index++;
+        } else if (direction === 'prev') {
+            Player.queue.nowPlaying.index--;
+        }
+        Player.updateStreamUrl();
+        Player.el.play();
+    };
+
+this.updateStreamUrl = function() {
+    var track = Player.queue.source.tracks.items[Player.queue.nowPlaying.index];
+    if (track) {
+        Player.queue.nowPlaying.track = track;
+        var artist = track.artists[0].name;
+        var trackName = track.name;
+        Player.el.src = '/api/tracks/mp3?artist=' + encodeURIComponent(artist) + '&track=' + encodeURIComponent(trackName);
+    } else {
+        Player.queue.nowPlaying.track = null;
+        Player.el.src = '';
+        Player.el.pause();
+    }
+};
+
+
+    Player.el.addEventListener('ended', function() {
+        $rootScope.$apply(function() {
+            Player.skip('next');
+        });
     });
-	
-	
-	Socket.on('queue:update', function(newQueue) {
-		Player.udpateQueue(newQueue);
-		Player.updateStreamUrl();
-		Player.updateVibrantSwatches();
-	});
-	
-	this.play = function(source) {
-		Socket.emit('queue:set', source);
-	};
-	
-	Socket.on('queue:set', function(source) {
-		Player.queue.source = source;
-		Player.updateStreamUrl();
-		Player.updateVibrantSwatches();
-	});
-	
-	
-	this.plause = function() {
-		Socket.emit('playback:plause');
-	};
-	
-	Socket.on('playback:play', function() {
-		setTimeout(function() {
-			Player.el.play();
-		}, (Player.maxLatency - Player.latency));
-	});
-	
-	Socket.on('playback:pause', function() {
-		setTimeout(function() {
-			Player.el.pause();
-		}, (Player.maxLatency - Player.latency));
-	});
-	
-	this.skip = function(direction) {
-		Socket.emit('playback:skip.' + direction);
-	};
-	
-	Socket.on('playback:skip.next', function() {
-		Player.queue.nowPlaying.index++;
-		Player.updateStreamUrl();
-		Player.updateVibrantSwatches();
-	});
-	
-	Socket.on('playback:skip.prev', function() {
-		Player.queue.nowPlaying.index--;
-		Player.updateStreamUrl();
-		Player.updateVibrantSwatches();
-	});
-	
-	this.updateVibrantSwatches = function() {
-		// Nested RAF to wait for Vibrant to load
-		window.requestAnimationFrame(function() {
-			window.requestAnimationFrame(function() {
-				Player.queue.nowPlaying.theme = Player.queue.nowPlaying.swatches.Vibrant.getBodyTextColor() == '#000' ? 'light' : 'dark';
-			});
-		});
-	};
-	
-	this.updateStreamUrl = function() {
-		var track = Player.queue.source.tracks.items[Player.queue.nowPlaying.index];
-		Player.queue.nowPlaying.streamUrl = '/api/tracks/mp3?artist='+track.artists[0].name+'&track='+track.name;
-	};
-	
-	Player.el.addEventListener('canplay', function() {
-		console.log('canplay');
-		Socket.emit('playback:canplay');
-	});
-	
-	Socket.on('playback:ended', function() {
-		Player.el.skip('next');
-	});
 }]);

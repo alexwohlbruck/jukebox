@@ -6,16 +6,18 @@ router.get('/:albumId', (req, res) => {
     spotify.getAlbum(req.params.albumId)
         .then(data => {
             res.status(data.statusCode).json(data.body);
-        }, err => {
+        })
+        .catch(err => {
             res.status(err.statusCode).json(err);
         });
 });
 
 router.get('/:albumId/tracks', (req, res) => {
-	spotify.getAlbumTracks(req.params.albumId)
+    spotify.getAlbumTracks(req.params.albumId)
         .then(data => {
             res.status(data.statusCode).json(data.body);
-        }, err => {
+        })
+        .catch(err => {
             res.status(err.statusCode).json(err);
         });
 });

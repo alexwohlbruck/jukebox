@@ -1,34 +1,37 @@
 /* global angular */
 var app = angular.module('jukebox');
 
-app.directive('seekbar', ['$document', 'Player', function($document) {
-	return {
-		restrict: 'E',
-		scope: {
-			audio: '='
-		},
-		link: function(scope, element, attrs) {
-			scope.audio.addEventListener('timeupdate', function() {
-				scope.$apply();
-			});
-			
-			scope.audio.addEventListener('progress', function() {
-				if (!scope.audio.buffers) scope.audio.buffers = [];
-				
-				if (scope.audio.duration > 0) {
-					for (var i = 0; i < scope.audio.buffered.length; i++) {
-						scope.audio.buffers[i] = {
-							length: Math.round(
-								(scope.audio.buffered.end(i) - scope.audio.buffered.start(i)) / scope.audio.duration * 100
-							),
-							offset: Math.round(
-								scope.audio.buffered.start(i) / scope.audio.duration * 100
-							)
-						};
-					}
-				}
-			});
-		},
-		templateUrl: 'components/player/seekbar/seekbar.directive.html'
-	};
+app.directive('seekbar', ['$document', function($document) {
+    return {
+        restrict: 'E',
+        scope: {
+            audio: '='
+        },
+        controller: ['$scope', function($scope) {
+            // Download track function
+            $scope.downloadTrack = function() {
+                var track = $scope.audio.source.tracks.items[$scope.audio.nowPlaying.index];
+                var trackUrl = track.preview_url;
+                var trackName = track.name + '.mp3';
+
+                if (trackUrl) {
+                    // Create an invisible anchor element
+                    var anchor = document.createElement('a');
+                    anchor.style.display = 'none';
+                    anchor.href = trackUrl;
+                    anchor.download = trackName;
+
+                    // Append the anchor element to the document body
+                    document.body.appendChild(anchor);
+
+                    // Trigger a click event on the anchor element to start the download
+                    anchor.click();
+
+                    // Remove the anchor element from the document body
+                    document.body.removeChild(anchor);
+                }
+            };
+        }],
+        templateUrl: 'components/player/seekbar/seekbar.directive.html'
+    };
 }]);

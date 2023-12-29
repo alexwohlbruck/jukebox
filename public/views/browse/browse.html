@@ -1,1 +1,92 @@
-<p class="md-display-2" style="margin: 20px 20px;">Browse</p>
+<!--<!DOCTYPE html>
+<html lang="en" ng-app="jukebox" ng-controller="MainCtrl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Jukebox</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+  <!-- Include other dependencies here --
+</head>
+
+<body>
+  <div ng-init="init()">
+    <p class="md-display-2" style="margin: 20px 20px;">Browse</p>
+    <div class="md-padding">
+      <p class="md-headline" style="margin: 5px 20px;">Artists</p>
+      <div class="row">
+        <artists data="popularArtists"></artists>
+      </div>
+    </div>
+
+    <div class="md-padding">
+      <p class="md-headline" style="margin: 5px 20px;">Albums</p>
+      <div class="row">
+        <albums data="popularAlbums1"></albums>
+        <albums data="popularAlbums2"></albums>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var app = angular.module('jukebox', []);
+
+    app.controller('MainCtrl', ['$scope', '$http', function($scope, $http) {
+      $scope.init = function() {
+        // Fetch selected artists
+        authenticate();
+      };
+
+      function authenticate() {
+        var clientId = process.env.SPOTIFY_CLIENT_ID;
+        var clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+        $http({
+          method: 'POST',
+          url: 'https://accounts.spotify.com/api/token',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+          },
+          data: 'grant_type=client_credentials'
+        }).then(function(response) {
+          var accessToken = response.data.access_token;
+          fetchPopularArtists(accessToken);
+          fetchPopularAlbums(accessToken);
+          fetchSelectedArtists(accessToken); // Add this line
+        }).catch(function(error) {
+          console.log('Error authenticating:', error);
+        });
+      }
+
+      function fetchPopularArtists(accessToken) {
+        // Your existing code for fetching popular artists
+      }
+
+      function fetchPopularAlbums(accessToken) {
+        // Your existing code for fetching popular albums
+      }
+
+      function fetchSelectedArtists(accessToken) {
+        $http({
+          method: 'GET',
+          url: 'https://api.spotify.com/v1/search',
+          headers: {
+            'Authorization': 'Bearer ' + accessToken
+          },
+          params: {
+            q: 'AJR',
+            type: 'artist',
+            limit: 10
+          }
+        }).then(function(response) {
+          $scope.selectedArtists = response.data.artists.items;
+        }).catch(function(error) {
+          console.log('Error fetching selected artists:', error);
+        });
+      }
+      $scope.fetchSelectedArtists = fetchSelectedArtists;
+    }]);
+  </script>
+</body>
+
+</html>
+-->

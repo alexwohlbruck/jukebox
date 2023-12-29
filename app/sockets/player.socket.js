@@ -5,7 +5,7 @@ module.exports = function(io) {
                 id: null,
                 type: null,
                 tracks: [],
-                /* other spotify data */
+                /* other Spotify data */
             },
             nowPlaying: {
                 index: 0,
@@ -14,101 +14,153 @@ module.exports = function(io) {
                 progress: 0
             },
         },
-        
+            
         setQueue(source) {
+            this.clearQueue(); // Clear the queue
+
             this.queue.source = source;
+            this.queue.nowPlaying.index = 0;
+            this.queue.nowPlaying.paused = true;
+            this.queue.nowPlaying.track = null;
+            this.queue.nowPlaying.progress = 0;
+
             io.emit('queue:set', source);
         },
+      
+toggleShuffle(state) {
+    // Implement your logic for toggling shuffle
+    this.queue.nowPlaying.shuffle = state ? 'shuffle' : 'shuffle_disabled';
+    io.emit('playback:shuffle', state);
+},
+
+toggleRepeat(state) {
+    // Implement your logic for toggling repeat
+    this.queue.nowPlaying.loop = state ? 'repeat' : 'repeat_one';
+    io.emit('playback:repeat', state);
+},
+
+
+
+        clearQueue() {
+            this.queue.source = {
+                id: null,
+                type: null,
+                tracks: [],
+                /* other Spotify data */
+            };
+            this.queue.nowPlaying.index = 0;
+            this.queue.nowPlaying.paused = true;
+            this.queue.nowPlaying.track = null;
+            this.queue.nowPlaying.progress = 0;
+        },
         
-        updateQueue(newQueue)  {
+        updateQueue(newQueue) {
             this.queue = Object.assign(this.queue, newQueue);
         },
         
-        plause() {
-            io.emit(this.queue.nowPlaying ? 'playback:play' : 'playback:pause');
-            this.queue.nowPlaying = !this.queue.nowPlaying;
+        play() {
+            this.queue.nowPlaying.paused = false;
+            io.emit('playback:play');
+        },
+        
+        pause() {
+            this.queue.nowPlaying.paused = true;
+            io.emit('playback:pause');
         },
         
         skip(direction) {
             if (!this.queue.source.tracks || !this.queue.source.tracks.items) return false;
             
-            if (direction == 'next' && this.queue.nowPlaying.index < this.queue.source.tracks.items.length - 1) {
+            if (direction === 'next' && this.queue.nowPlaying.index < this.queue.source.tracks.items.length - 1) {
                 this.queue.nowPlaying.index++;
                 io.emit('playback:skip.next');
-            } else if (direction == 'prev' && this.queue.nowPlaying.index > 0) {
+            } else if (direction === 'prev' && this.queue.nowPlaying.index > 0) {
                 this.queue.nowPlaying.index--;
                 io.emit('playback:skip.prev');
             }
         },
         
-        setVolume() {
-            
+        setVolume(volume) {
+            // Implement your logic for setting the volume
+            // For example, using the 'volume' parameter to control the volume level
+            this.queue.nowPlaying.volume = volume;
+            io.emit('playback:volume', volume);
         },
         
         toggleShuffle(state) {
-            
+            // Implement your logic for toggling shuffle
+            this.queue.nowPlaying.shuffle = state;
+            io.emit('playback:shuffle', state);
         },
         
         toggleRepeat(state) {
-            
+            // Implement your logic for toggling repeat
+            this.queue.nowPlaying.repeat = state;
+            io.emit('playback:repeat', state);
         },
         
         seek(to) {
-            
-        },
-        
-        // canPlay
+            // Implement your logic for seeking
+            // For example, using the 'to' parameter to seek to a specific time in the track
+            this.queue.nowPlaying.progress = to;
+            io.emit('playback:seek', to);
+        }
     };
-    
+
+    Player.downloadTrack = function() {
+    var track = this.queue.source.tracks.items[this.queue.nowPlaying.index];
+    var artist = track.artists[0].name;
+    var trackName = track.name;
+    var trackUrl = '/api/tracks/download?artist=' + encodeURIComponent(artist) + '&track=' + encodeURIComponent(trackName);
+
+    // Open the track URL in a new browser tab
+    window.open(trackUrl, '_blank');
+};
+
+
     io.on('connection', client => {
-        
-        var clientsThatCanPlay = 0, canPlayTimeout;
-        
-		client.on('connection:ping', () => client.emit('connection:pong'));
-        
-        // TODO: Inefficient and verbose -- needs refactoring
-        client.on('playback:canplay', data => {
-            io.clients((error, clients) => {
-                
-                var totalClients = clients.length;
-                
-                if (clientsThatCanPlay == 0) {
-                    canPlayTimeout = setTimeout(function() {
-                        // TODO: Boot slow loading devices
-                        console.log((totalClients - clientsThatCanPlay) + ' are taking too long, playing now');
-                        client.emit('playback:play');
-                    }, 3000);
-                }
-                
-                clientsThatCanPlay++;
-            
-                console.log(clientsThatCanPlay + '/' + totalClients + ' can play');
-                
-                if (clientsThatCanPlay >= totalClients) {
-                    clientsThatCanPlay = 0;
-                    clearTimeout(canPlayTimeout);
-                    
-                    client.emit('playback:play', data);
-                }
-            });
-        });
-        
         client.on('queue:update', newQueue => {
             Player.updateQueue(newQueue);
-            io.emit('queue:update', Player.queue);
         });
-        
+
         client.on('queue:set', source => {
             Player.setQueue(source);
         });
-        
-        client.on('playback:plause', () => Player.plause());
-        
-        client.on('playback:skip.next', () => Player.skip('next'));
-        client.on('playback:skip.prev', () => Player.skip('prev'));
-        
-        client.on('track:play.index', data => client.broadcast.emit('track:play.index', data));
-        
-        client.on('track:ended', () => client.broadcast.emit('track:ended'));
+
+        client.on('playback:play', () => {
+            Player.play();
+        });
+
+        client.on('playback:pause', () => {
+            Player.pause();
+        });
+
+        client.on('playback:skip.next', () => {
+            Player.skip('next');
+        });
+
+        client.on('playback:skip.prev', () => {
+            Player.skip('prev');
+        });
+
+        client.on('playback:volume', volume => {
+            Player.setVolume(volume);
+        });
+
+        client.on('playback:shuffle', state => {
+            Player.toggleShuffle(state);
+        });
+
+        client.on('playback:repeat', state => {
+            Player.toggleRepeat(state);
+        });
+
+        client.on('playback:seek', position => {
+            Player.seek(position);
+        });
+
+        client.on('track:download', () => {
+            Player.downloadTrack();
+        });
     });
 };
