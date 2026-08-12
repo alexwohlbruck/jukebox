@@ -1,0 +1,8 @@
+.git
+.env
+node_modules
+npm-debug.log*
+test
+app
+config
+Gruntfile.js
