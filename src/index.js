@@ -80,7 +80,7 @@ function cleanStartMs(value) {
 
 function searchQuery({ artist, track }) {
   // The search text is an argument, never a shell command; users cannot inject flags or commands.
-  return `ytsearch1:${artist} - ${track} official audio`;
+  return `ytsearch1:${artist} - ${track}`;
 }
 
 function resolveYouTubeUrl(source) {
