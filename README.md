@@ -1,25 +1,38 @@
-# Setup process:
+# Jukebox
 
-Step 1: Go to [heroku](https://dashboard.heroku.com/apps) and create a new app.
+Jukebox is a self-hosted music streaming service. Its backend resolves optional Spotify track IDs into artist/title metadata, finds a matching YouTube audio source with `yt-dlp`, then transcodes and streams MP3 with `ffmpeg`. Audio is never stored on disk.
 
-Step 2: Link your github fork of this project to the app (In the setup page or deployment menu) - Use `main` branch for auto updates
+The original AngularJS application is served at `/`. The current backend API is versioned under `/v1`; the legacy Angular client still refers to retired `/api` routes and is retained unchanged for historical reference.
 
-Step 3: Go to the settings and fill out the following enviromental variables/config vars
+## Backend API
 
+The complete endpoint, validation, response, and error reference is in [docs/API.md](docs/API.md). In short:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /health` | Container health check. |
+| `GET /v1/metadata?spotifyTrackId=…` | Resolve a Spotify track ID without starting playback. |
+| `GET /v1/stream?artist=…&track=…` | Find and stream a matching MP3. |
+| `GET /v1/stream?spotifyTrackId=…` | Resolve Spotify metadata, then stream a matching MP3. |
+
+Example:
+
+```sh
+curl -L 'https://jukebox.wohlbruck.dev/v1/stream?artist=Daft%20Punk&track=Harder%20Better%20Faster%20Stronger' \
+  --output track.mp3
 ```
-SPOTIFY_CLIENT_ID = xxxxxxxxxxxxxxxxxxxxx
-SPOTIFY_CLIENT_SECRET = xxxxxxxxxxxxxxxxxxxxx
-GOOGLE_SERVER_KEY = xxxxxxxxxxxxxxxxxxxxx
+
+## Run locally
+
+```sh
+cp .env.example .env
+npm install
+npm start
+curl -I 'http://localhost:8080/v1/stream?artist=Daft%20Punk&track=Harder%20Better%20Faster%20Stronger'
 ```
-To get the Google server key, head to the [Google Cloud Platform website](https://console.cloud.google.com/), create a project and go to the APIs and Services page. Then Enable the `Youtube Data API V3`. You should be able to generate a server API key, which will be the value to put in your .env file.
 
-Then, log in to the [Spotify Developer Console](https://developer.spotify.com/dashboard), and create a new app. Once created, you should get Client ID and Client Secret keys, which are the other two values for your `.env` file.
+The production Docker image includes `yt-dlp` and `ffmpeg`. See [deploy/README.md](deploy/README.md) for Vega-specific deployment, configuration, verification, and troubleshooting.
 
-Step 4: Go back to the settings and install the nodejs buildpack.
+## Vega deployment
 
-Step 5: Deploy the webapp.
-
-Make an [issue](https://github.com/alexwohlbruck/jukebox/issues) if you have problems with anything.
-
-
-This is a README.md file made by LaganYT for the self hosting of the Jukebox Redux project.
+Follow [deploy/README.md](deploy/README.md). The service joins the existing `opt_caddy` network and has no exposed host port.
