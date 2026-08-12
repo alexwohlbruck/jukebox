@@ -107,7 +107,9 @@ function streamAsMp3({ artist, track, startMs = 0 }, response) {
   const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
-  const encoder = spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', 'pipe:0', '-vn', '-map', 'a:0', '-codec:a', 'libmp3lame', '-q:a', '2', '-f', 'mp3', 'pipe:1'], {
+  // This is a live player rather than an archival encoder: start decoding as
+  // soon as the first audio packets arrive and flush each MP3 packet onward.
+  const encoder = spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-analyzeduration', '0', '-probesize', '32k', '-i', 'pipe:0', '-vn', '-map', 'a:0', '-codec:a', 'libmp3lame', '-q:a', '2', '-flush_packets', '1', '-f', 'mp3', 'pipe:1'], {
     stdio: ['pipe', 'pipe', 'pipe'],
   });
   downloader.stdout.pipe(encoder.stdin);
