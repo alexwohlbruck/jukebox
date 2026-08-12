@@ -17,16 +17,22 @@ ALLOWED_ORIGINS=https://alex.wohlbruck.dev
 
 The checked-in [.env.example](../.env.example) is a safe template. Never commit the real `.env` file.
 
-## Deploy or update
+## Automatic updates
+
+Pushing to `master` runs [the image-publishing workflow](../.github/workflows/publish-image.yml), which publishes `ghcr.io/alexwohlbruck/jukebox:latest`. Vega's Watchtower checks labeled containers hourly and recreates Jukebox when that tag changes.
+
+The compose service is explicitly labeled `com.centurylinklabs.watchtower.enable=true`. No host port is exposed; the recreated container rejoins `opt_caddy` and Caddy continues to proxy it by name.
+
+## Initial deploy or manual rollback
 
 ```sh
 cd /opt/jukebox
-docker compose build --quiet
+docker compose pull
 docker compose up -d
 docker compose ps
 ```
 
-The image contains Node.js, `yt-dlp`, and `ffmpeg`, so no host-level media tooling is required.
+Run this once after the GitHub Actions image has been published, or to pull a newly published image without waiting for Watchtower. The image contains Node.js, `yt-dlp`, and `ffmpeg`, so no host-level media tooling is required.
 
 ## Caddy
 
@@ -63,4 +69,5 @@ The expected media type is `audio/mpeg`; `file` should identify MPEG Layer III a
 - `503 Spotify lookup is not configured`: add both Spotify credentials, then recreate the container with `docker compose up -d --force-recreate`.
 - `502 Unable to prepare the requested audio stream`: inspect `docker compose logs jukebox`; YouTube availability and yt-dlp extraction can change independently of the API.
 - TLS errors: verify DNS with `dig +short jukebox.wohlbruck.dev`, then inspect `docker logs caddy` for ACME messages. Caddy's TLS-ALPN validation needs inbound port 443.
-- A stale Docker health status after a rebuild: wait for the healthcheck interval, then run `docker inspect -f '{{.State.Health.Status}}' jukebox`.
+- A stale Docker health status after an update: wait for the healthcheck interval, then run `docker inspect -f '{{.State.Health.Status}}' jukebox`.
+- No automatic update after an hour: check `docker logs watchtower` and confirm `docker inspect jukebox --format '{{index .Config.Labels "com.centurylinklabs.watchtower.enable"}}'` returns `true`.
