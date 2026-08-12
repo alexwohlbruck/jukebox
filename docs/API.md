@@ -41,6 +41,24 @@ GET /v1/metadata?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC
 
 This endpoint requires `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
 
+## `GET /v1/debug/resolve`
+
+Runs the same YouTube search as `/v1/stream`, but returns the selected video URL
+instead of starting an audio stream. Use it to diagnose an incorrect match.
+It accepts the same source parameters as `/v1/stream`; `startMs` is accepted but
+does not affect matching.
+
+```http
+GET /v1/debug/resolve?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC
+```
+
+```json
+{
+  "search": "ytsearch1:Rick Astley - Never Gonna Give You Up official audio",
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+```
+
 ## `GET /v1/stream`
 
 Finds a matching YouTube result through `yt-dlp` and streams its audio as MP3. The response is produced live—there is no cached file and no `Content-Length`, so clients should treat it as a chunked stream.

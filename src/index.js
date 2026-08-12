@@ -38,6 +38,19 @@ app.get('/v1/stream', async (request, response, next) => {
   }
 });
 
+/** Shows the exact YouTube match the stream route would transcode. */
+app.get('/v1/debug/resolve', async (request, response, next) => {
+  try {
+    const source = await getSource(request.query);
+    response.set('Cache-Control', 'no-store').json({
+      search: searchQuery(source),
+      url: await resolveYouTubeUrl(source),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function cleanText(value, field) {
   if (typeof value !== 'string' || !value.trim()) throw new HttpError(400, `${field} is required.`);
   const normalized = value.trim().replace(/\s+/g, ' ');
@@ -65,9 +78,31 @@ function cleanStartMs(value) {
   return startMs;
 }
 
-function streamAsMp3({ artist, track, startMs = 0 }, response) {
+function searchQuery({ artist, track }) {
   // The search text is an argument, never a shell command; users cannot inject flags or commands.
-  const search = `ytsearch1:${artist} - ${track} official audio`;
+  return `ytsearch1:${artist} - ${track} official audio`;
+}
+
+function resolveYouTubeUrl(source) {
+  return new Promise((resolve, reject) => {
+    const resolver = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--skip-download', '--print', '%(webpage_url)s', searchQuery(source)], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let output = '';
+    let errorOutput = '';
+    resolver.stdout.on('data', (chunk) => { output += chunk; });
+    resolver.stderr.on('data', (chunk) => { errorOutput = `${errorOutput}${chunk}`.slice(-2000); });
+    resolver.on('error', (error) => reject(new HttpError(502, `Could not resolve YouTube source: ${error.message}`)));
+    resolver.on('close', (code) => {
+      const url = output.trim().split(/\s+/)[0];
+      if (code === 0 && url?.startsWith('https://')) return resolve(url);
+      reject(new HttpError(502, `Could not resolve YouTube source: ${errorOutput || `yt-dlp exited with code ${code}.`}`));
+    });
+  });
+}
+
+function streamAsMp3({ artist, track, startMs = 0 }, response) {
+  const search = searchQuery({ artist, track });
   const offset = startMs ? ['--download-sections', `*${(startMs / 1000).toFixed(3)}-inf`] : [];
   const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
     stdio: ['ignore', 'pipe', 'pipe'],
