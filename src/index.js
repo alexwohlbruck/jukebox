@@ -32,7 +32,7 @@ app.get('/v1/metadata', async (request, response, next) => {
 app.get('/v1/stream', async (request, response, next) => {
   try {
     const source = await getSource(request.query);
-    streamAsMp3(source, response);
+    streamAsMp3(source, response, requestStartedAt(request.query));
   } catch (error) {
     next(error);
   }
@@ -78,6 +78,25 @@ function cleanStartMs(value) {
   return startMs;
 }
 
+/**
+ * A companion player records when it asked to join the track. Resolution and
+ * decoder startup can take a few seconds, so advance its requested source
+ * offset by that elapsed time immediately before spawning yt-dlp. This keeps
+ * the first audible packet close to the live Spotify position without adding
+ * another seek or buffering round-trip.
+ */
+function requestStartedAt(query) {
+  if (query.requestedAtMs === undefined) return undefined;
+  if (typeof query.requestedAtMs !== 'string' || !/^\d{13}$/.test(query.requestedAtMs)) {
+    throw new HttpError(400, 'requestedAtMs must be a Unix timestamp in milliseconds.');
+  }
+  const requestedAtMs = Number(query.requestedAtMs);
+  if (!Number.isSafeInteger(requestedAtMs)) {
+    throw new HttpError(400, 'requestedAtMs must be a Unix timestamp in milliseconds.');
+  }
+  return requestedAtMs;
+}
+
 function searchQuery({ artist, track }) {
   // The search text is an argument, never a shell command; users cannot inject flags or commands.
   return `ytsearch1:${artist} - ${track}`;
@@ -101,9 +120,11 @@ function resolveYouTubeUrl(source) {
   });
 }
 
-function streamAsMp3({ artist, track, startMs = 0 }, response) {
+function streamAsMp3({ artist, track, startMs = 0 }, response, requestedAtMs) {
   const search = searchQuery({ artist, track });
-  const offset = startMs ? ['--download-sections', `*${(startMs / 1000).toFixed(3)}-inf`] : [];
+  const elapsedMs = requestedAtMs === undefined ? 0 : Math.max(0, Date.now() - requestedAtMs);
+  const liveStartMs = Math.min(MAX_START_MS, startMs + elapsedMs);
+  const offset = liveStartMs ? ['--download-sections', `*${(liveStartMs / 1000).toFixed(3)}-inf`] : [];
   const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });

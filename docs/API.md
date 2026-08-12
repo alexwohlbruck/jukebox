@@ -72,14 +72,14 @@ Provide exactly one source form:
 
 `artist` and `track` are each required for artist/title streaming, normalized for whitespace, and limited to 200 characters. `spotifyTrackId` must be a 22-character ID.
 
-`startMs` is optional. It starts the source at a non-negative millisecond offset (up to six hours), which lets a companion player join an already-playing track. Because the source is resolved and transcoded live, the start is best-effort and may be a little late.
+`startMs` is optional. It starts the source at a non-negative millisecond offset (up to six hours), which lets a companion player join an already-playing track. `requestedAtMs` is an optional 13-digit Unix timestamp from that companion; Jukebox advances the offset by time spent resolving the stream before starting yt-dlp, which avoids beginning several seconds behind live playback.
 
 ```http
 GET /v1/stream?artist=Daft%20Punk&track=One%20More%20Time
 ```
 
 ```http
-GET /v1/stream?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC&startMs=42000
+GET /v1/stream?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC&startMs=42000&requestedAtMs=1766011200000
 ```
 
 Successful responses have these important headers:
