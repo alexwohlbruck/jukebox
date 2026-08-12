@@ -54,12 +54,14 @@ Provide exactly one source form:
 
 `artist` and `track` are each required for artist/title streaming, normalized for whitespace, and limited to 200 characters. `spotifyTrackId` must be a 22-character ID.
 
+`startMs` is optional. It starts the source at a non-negative millisecond offset (up to six hours), which lets a companion player join an already-playing track. Because the source is resolved and transcoded live, the start is best-effort and may be a little late.
+
 ```http
 GET /v1/stream?artist=Daft%20Punk&track=One%20More%20Time
 ```
 
 ```http
-GET /v1/stream?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC
+GET /v1/stream?spotifyTrackId=4uLU6hMCjMI75M1A2tKUQC&startMs=42000
 ```
 
 Successful responses have these important headers:

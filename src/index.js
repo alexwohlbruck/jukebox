@@ -7,6 +7,7 @@ import { HttpError, SpotifyClient } from './spotify.js';
 
 const PORT = Number(process.env.PORT || 8080);
 const YTDLP_BIN = process.env.YTDLP_BIN || 'yt-dlp';
+const MAX_START_MS = 6 * 60 * 60 * 1000;
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((value) => value.trim()).filter(Boolean) || [];
 const spotify = new SpotifyClient({
   clientId: process.env.SPOTIFY_CLIENT_ID,
@@ -45,17 +46,30 @@ function cleanText(value, field) {
 }
 
 async function getSource(query) {
-  if (query.spotifyTrackId) return spotify.getTrack(cleanText(query.spotifyTrackId, 'spotifyTrackId'));
+  const startMs = cleanStartMs(query.startMs);
+  if (query.spotifyTrackId) return { ...(await spotify.getTrack(cleanText(query.spotifyTrackId, 'spotifyTrackId'))), startMs };
   return {
     artist: cleanText(query.artist, 'artist'),
     track: cleanText(query.track, 'track'),
+    startMs,
   };
 }
 
-function streamAsMp3({ artist, track }, response) {
+function cleanStartMs(value) {
+  if (value === undefined) return 0;
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) throw new HttpError(400, 'startMs must be a non-negative integer.');
+  const startMs = Number(value);
+  if (!Number.isSafeInteger(startMs) || startMs > MAX_START_MS) {
+    throw new HttpError(400, `startMs must be at most ${MAX_START_MS}.`);
+  }
+  return startMs;
+}
+
+function streamAsMp3({ artist, track, startMs = 0 }, response) {
   // The search text is an argument, never a shell command; users cannot inject flags or commands.
   const search = `ytsearch1:${artist} - ${track} official audio`;
-  const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', '--output', '-', search], {
+  const offset = startMs ? ['--download-sections', `*${(startMs / 1000).toFixed(3)}-inf`] : [];
+  const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   const encoder = spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', 'pipe:0', '-vn', '-map', 'a:0', '-codec:a', 'libmp3lame', '-q:a', '2', '-f', 'mp3', 'pipe:1'], {
