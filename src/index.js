@@ -7,6 +7,14 @@ import { HttpError, SpotifyClient } from './spotify.js';
 
 const PORT = Number(process.env.PORT || 8080);
 const YTDLP_BIN = process.env.YTDLP_BIN || 'yt-dlp';
+// YouTube rejects unattested requests for the audio formats we want, so yt-dlp
+// mints a PO token per video via the bgutil provider. The plugin defaults to
+// 127.0.0.1, but the provider is its own container -- point it across the
+// compose network. Set POT_PROVIDER_BASE_URL empty to run without a provider.
+const POT_PROVIDER_BASE_URL = process.env.POT_PROVIDER_BASE_URL ?? 'http://bgutil-provider:4416';
+const POT_ARGS = POT_PROVIDER_BASE_URL
+  ? ['--extractor-args', `youtubepot-bgutilhttp:base_url=${POT_PROVIDER_BASE_URL}`]
+  : [];
 const MAX_START_MS = 6 * 60 * 60 * 1000;
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((value) => value.trim()).filter(Boolean) || [];
 const spotify = new SpotifyClient({
@@ -104,7 +112,7 @@ function searchQuery({ artist, track }) {
 
 function resolveYouTubeUrl(source) {
   return new Promise((resolve, reject) => {
-    const resolver = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--skip-download', '--print', '%(webpage_url)s', searchQuery(source)], {
+    const resolver = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', ...POT_ARGS, '--skip-download', '--print', '%(webpage_url)s', searchQuery(source)], {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let output = '';
@@ -125,7 +133,7 @@ function streamAsMp3({ artist, track, startMs = 0 }, response, requestedAtMs) {
   const elapsedMs = requestedAtMs === undefined ? 0 : Math.max(0, Date.now() - requestedAtMs);
   const liveStartMs = Math.min(MAX_START_MS, startMs + elapsedMs);
   const offset = liveStartMs ? ['--download-sections', `*${(liveStartMs / 1000).toFixed(3)}-inf`] : [];
-  const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
+  const downloader = spawn(YTDLP_BIN, ['--no-playlist', '--no-warnings', ...POT_ARGS, '--format', 'bestaudio/best', ...offset, '--output', '-', search], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   // This is a live player rather than an archival encoder: start decoding as

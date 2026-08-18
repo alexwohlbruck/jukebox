@@ -1,12 +1,27 @@
 services:
+  # Mints YouTube PO tokens for yt-dlp. Pinned to match the plugin version
+  # installed in the image; the two are expected to move together.
+  bgutil-provider:
+    container_name: bgutil-provider
+    image: brainicism/bgutil-ytdlp-pot-provider:1.3.1
+    restart: unless-stopped
+    init: true
+    networks:
+      - caddy
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+
   jukebox:
     container_name: jukebox
     image: ghcr.io/alexwohlbruck/jukebox:latest
     restart: unless-stopped
+    depends_on:
+      - bgutil-provider
     env_file: .env
     environment:
       NODE_ENV: production
       PORT: 8080
+      POT_PROVIDER_BASE_URL: http://bgutil-provider:4416
     networks:
       - caddy
     labels:
