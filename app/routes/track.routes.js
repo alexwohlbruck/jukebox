@@ -30,44 +30,72 @@ router.get('/mp3', function(req, res) {
 		maxResults: 1,
 		type: 'video'
 	}, function(err, data) {
-		if (err) return res.status(err.statusCode).json(err);
-		if (data.items.length == 0) return res.status(404).json({message: "Couldn't find track"});
-		
+		if (err) return res.status(err.statusCode || 500).json(err);
+		if (!data.items || data.items.length == 0) return res.status(404).json({message: "Couldn't find track"});
+
 		var videoId = data.items[0].id.videoId;
 		var url = 'https://www.youtube.com/watch?v='+videoId;
-		
-		var range = '0-';
-		
+
+		// ytdl-core v4 wants {start, end}, not the raw header string -- a string
+		// is silently ignored, so we'd stream the whole file while advertising a
+		// short Content-Length and the client would hang up mid-write.
+		var isPartial = false;
+		var start = 0;
+		var end;
+
 		if (req.headers.range) {
-			range = req.headers.range.replace(/bytes=/, "");
+			var parts = req.headers.range.replace(/bytes=/, "").split("-");
+			var parsedStart = parseInt(parts[0], 10);
+			var parsedEnd = parseInt(parts[1], 10);
+
+			if (!isNaN(parsedStart)) {
+				isPartial = true;
+				start = parsedStart;
+				if (!isNaN(parsedEnd)) end = parsedEnd;
+			}
 		}
-		
+
 		var audio = ytdl(url, {
 			filter: 'audioonly',
-			range: range
+			range: end === undefined ? {start: start} : {start: start, end: end}
 		});
-		
+
+		// The client bailing out (seek, skip, tab close) is routine, not an error.
+		// Without this the pipe keeps writing into a dead socket and the EPIPE
+		// takes the whole process down.
+		var closed = false;
+		function cleanup() {
+			if (closed) return;
+			closed = true;
+			audio.destroy();
+		}
+
+		req.on('aborted', cleanup);
+		res.on('close', cleanup);
+		res.on('error', cleanup);
+
+		audio.on('error', function(err) {
+			console.log('ytdl failed for ' + url + ': ' + err.message);
+			cleanup();
+			if (res.headersSent) return res.destroy();
+			return res.status(502).json({message: "Couldn't stream track"});
+		});
+
 		audio.on('response', function(data) {
-			var totalSize = data.headers['content-length'];
-			
-			var parts = range.split("-");
-			var partialstart = parts[0];
-			var partialend = parts[1];
-			
-			var start = parseInt(partialstart, 10);
-			var end = partialend ? parseInt(partialend, 10) : totalSize - 1;
-			
-			var chunkSize = (end - start) + 1;
-			
-			res.writeHead(200, {
+			if (closed || res.headersSent) return;
+
+			var totalSize = parseInt(data.headers['content-length'], 10);
+			var lastByte = end === undefined ? start + totalSize - 1 : end;
+
+			res.writeHead(isPartial ? 206 : 200, {
 				'Content-Type': 'audio/webm',
-				'Content-Range': 'bytes ' + start + '-' + end + '/' + totalSize,
-				'Content-Length': chunkSize,
+				'Content-Range': 'bytes ' + start + '-' + lastByte + '/' + (start + totalSize),
+				'Content-Length': totalSize,
 				'Content-Disposition': 'inline; filename="'+req.query.track.replace(/[^a-zA-Z0-9 ]/g, "")+'.mp3"',
 				'Accept-Ranges': 'bytes'
 			});
 		});
-		
+
 		audio.pipe(res);
 	});
 });
