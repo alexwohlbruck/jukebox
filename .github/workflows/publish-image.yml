@@ -3,6 +3,11 @@ name: Publish Jukebox image
 on:
   push:
     branches: [master]
+  # yt-dlp is installed from the nightly channel at build time, so the image
+  # ages out on its own: YouTube changes extraction and the baked-in build
+  # starts returning 403 on every video. Rebuild weekly to stay current.
+  schedule:
+    - cron: '17 5 * * 1'
   workflow_dispatch:
 
 permissions:
