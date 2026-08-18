@@ -139,10 +139,24 @@ function streamAsMp3({ artist, track, startMs = 0 }, response, requestedAtMs) {
   const collectError = (chunk) => { errorOutput = `${errorOutput}${chunk}`.slice(-2000); };
   downloader.stderr.on('data', collectError);
   encoder.stderr.on('data', collectError);
+  let stopped = false;
   const stop = () => {
+    stopped = true;
     downloader.kill('SIGTERM');
     encoder.kill('SIGTERM');
   };
+  // A listener hanging up is routine: response 'close' kills ffmpeg, but yt-dlp
+  // is still writing into encoder.stdin. Each stdio pipe is a socket of its own,
+  // and `downloader.on('error')` covers only spawn failures -- so that write
+  // lands on a closed pipe and the unhandled EPIPE takes the process down.
+  const onStreamError = (error) => {
+    if (stopped || error.code === 'EPIPE' || error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
+    fail(error.message);
+  };
+  downloader.stdout.on('error', onStreamError);
+  encoder.stdin.on('error', onStreamError);
+  encoder.stdout.on('error', onStreamError);
+  response.on('error', stop);
   response.on('close', stop);
   downloader.on('error', (error) => fail(error.message));
   encoder.on('error', (error) => fail(error.message));
